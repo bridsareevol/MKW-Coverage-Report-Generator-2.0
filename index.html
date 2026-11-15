@@ -1,0 +1,4352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MKW Coverage Report Generator</title>
+<meta name="description" content="MKW Residence Coverage & Floor-by-Floor Sweep Report Generator styled in the RASTER/27 pixel-grid design system.">
+<meta property="og:title" content="MKW Coverage Report Generator">
+<meta property="og:description" content="MKW Residence Coverage & Floor-by-Floor Sweep Report Generator styled in the RASTER/27 pixel-grid design system.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sodium: #B9E6EC;
+  --ink: #0A0A0A;
+  --paper: #FFFFFF;
+  --cream: #FFFDE8;
+  --blue: #6282E5;
+  --pink: #EB89B2;
+  --gold: #E7C434;
+  --green: #E7C434;
+  --lavender: #6282E5;
+  --coral: #A61127;
+  --mint: #E7C434;
+  --espresso: #482521;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 16px;
+  --s4: 24px;
+  --s5: 32px;
+  --s6: 48px;
+  --s7: 64px;
+  --s8: 96px;
+
+  --cols: 4;
+  --gutter: 10px;
+  --margin: 16px;
+  --sec-pad: 48px;
+  --header-h: 56px;
+
+  --bg: var(--sodium);
+  --fg: var(--ink);
+  --focus: var(--ink);
+  --rule-color: var(--ink);
+  --rule: 1px solid var(--rule-color);
+  --rule-strong: 2px solid var(--rule-color);
+}
+
+@media (min-width: 390px) {
+  :root { --gutter: 12px; }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --cols: 8;
+    --gutter: 12px;
+    --margin: 20px;
+    --sec-pad: 64px;
+    --header-h: 64px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --cols: 12;
+    --gutter: 16px;
+    --margin: 24px;
+    --sec-pad: 72px;
+  }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    --margin: 28px;
+    --sec-pad: 80px;
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+html {
+  font-family: "Inter Tight", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  font-size: 16px;
+  background-color: var(--sodium);
+  color: var(--ink);
+  scroll-padding-top: 84px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.motion-on {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html.menu-open { overflow: hidden; }
+
+body {
+  margin: 0;
+  padding: 0;
+  padding-top: var(--header-h);
+  background-color: var(--bg);
+  color: var(--fg);
+  font-weight: 400;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button, [role="button"], input, select, textarea, label {
+  touch-action: manipulation;
+}
+
+main { flex: 1; }
+
+h1, h2, h3, h4, p, ul, ol, dl, dt, dd, figure, figcaption, blockquote {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol { list-style: none; }
+a { color: inherit; text-decoration: none; }
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+
+button { cursor: pointer; }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+:focus:not(:focus-visible) { outline: none; }
+
+/* Surfaces */
+[data-surface="sodium"] {
+  --bg: var(--sodium);
+  --fg: var(--ink);
+  --focus: var(--ink);
+  --rule-color: var(--ink);
+  --rule: 1px solid var(--ink);
+  --rule-strong: 2px solid var(--ink);
+  background-color: var(--sodium);
+  color: var(--ink);
+}
+
+[data-surface="paper"] {
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --focus: var(--ink);
+  --rule-color: var(--ink);
+  --rule: 1px solid var(--ink);
+  --rule-strong: 2px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+}
+
+[data-surface="ink"] {
+  --bg: var(--ink);
+  --fg: var(--sodium);
+  --focus: var(--sodium);
+  --rule-color: var(--sodium);
+  --rule: 1px solid var(--sodium);
+  --rule-strong: 2px solid var(--sodium);
+  background-color: var(--ink);
+  color: var(--sodium);
+}
+
+/* Typography scale */
+.t-micro {
+  font-size: clamp(0.75rem, 0.72rem + 0.1vw, 0.8125rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+.t-small {
+  font-size: clamp(0.875rem, 0.83rem + 0.2vw, 0.9375rem);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+}
+
+.t-body {
+  font-size: clamp(1rem, 0.94rem + 0.25vw, 1.125rem);
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  max-width: 62ch;
+}
+
+.t-lead {
+  font-size: clamp(1.2rem, 0.95rem + 0.85vw, 1.55rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.t-h2 {
+  font-size: clamp(1.5rem, 1rem + 1.8vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.t-h1 {
+  font-size: clamp(2.125rem, 1.2rem + 3.2vw, 3.75rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+.t-paper { color: var(--paper); }
+.t-sodium { color: var(--sodium); }
+.t-ink { color: var(--ink); }
+.fw-600 { font-weight: 600; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: var(--margin);
+  z-index: 200;
+  background-color: var(--ink);
+  color: var(--sodium);
+  padding: 0 var(--s3);
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 3px solid var(--sodium);
+  outline-offset: 3px;
+}
+
+/* 12-col grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+  padding-inline: var(--margin);
+  width: 100%;
+}
+
+.sec { padding-block: var(--sec-pad); }
+
+.col-full { grid-column: 1 / -1; }
+.col-1-3 { grid-column: 1 / -1; }
+.col-5-12 { grid-column: 1 / -1; }
+
+@media (min-width: 768px) {
+  .col-1-3 { grid-column: 1 / 4; }
+  .col-5-12 { grid-column: 1 / -1; }
+}
+
+@media (min-width: 1024px) {
+  .col-1-3 { grid-column: 1 / 4; }
+  .col-5-12 { grid-column: 5 / 13; }
+}
+
+/* Header */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-h);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  border-bottom: var(--rule);
+}
+
+.header-grid { align-items: center; }
+
+.logo-link {
+  grid-column: 1 / 4;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 6px 0;
+  justify-self: start;
+}
+
+.logo-svg {
+  display: block;
+  width: 138px;
+  height: 21.6px;
+}
+
+@media (min-width: 768px) {
+  .logo-svg {
+    width: 172px;
+    height: 27px;
+  }
+}
+
+.main-nav { display: none; }
+.header-actions-desktop { display: none; }
+
+.menu-btn-wrap {
+  grid-column: -2 / -1;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+}
+
+.menu-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--s2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (min-width: 1024px) {
+  .main-nav {
+    display: flex;
+    grid-column: 4 / 10;
+    align-items: center;
+    gap: var(--s2);
+  }
+  .header-actions-desktop {
+    display: flex;
+    grid-column: 10 / 13;
+    justify-self: end;
+    align-items: center;
+    gap: var(--s3);
+    white-space: nowrap;
+  }
+  .menu-btn-wrap { display: none; }
+}
+
+.nav-step-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 6px;
+  white-space: nowrap;
+}
+
+.nav-step-btn[aria-current="step"] {
+  background-color: var(--ink);
+  color: var(--sodium);
+}
+
+[data-surface="ink"] .nav-step-btn[aria-current="step"] {
+  background-color: var(--sodium);
+  color: var(--ink);
+}
+
+/* Text buttons & underline */
+.btn-text {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  min-width: 24px;
+  padding: 4px 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.u-anim::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+html.motion-on .u-anim:hover::after,
+html.motion-on .u-anim:focus-visible::after {
+  transform: scaleX(1);
+  transition: transform 180ms steps(6);
+}
+
+html:not(.motion-on) .u-anim:hover::after,
+html:not(.motion-on) .u-anim:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Primary & Secondary Buttons */
+.primary-action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 22px;
+  background-color: var(--ink);
+  color: var(--sodium);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  white-space: nowrap;
+}
+
+[data-surface="ink"] .primary-action {
+  background-color: var(--sodium);
+  color: var(--ink);
+  border-color: var(--sodium);
+}
+
+.primary-action.btn-sm {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 0.875rem;
+}
+
+.primary-action::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--blue);
+  transform: scaleX(0);
+  transform-origin: left center;
+  z-index: 0;
+}
+
+html.motion-on .primary-action:not([disabled]):hover::before {
+  transform: scaleX(1);
+  transition: transform 220ms steps(6);
+}
+
+html:not(.motion-on) .primary-action:not([disabled]):hover::before {
+  transform: scaleX(1);
+}
+
+.primary-action:not([disabled]):hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.primary-action > span {
+  position: relative;
+  z-index: 1;
+}
+
+.primary-action:not([disabled]):active {
+  transform: translateY(1px);
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--rule-color);
+  background-color: transparent;
+  color: var(--fg);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.secondary-button:hover {
+  background-color: var(--fg);
+  color: var(--bg);
+}
+
+/* Mobile menu overlay */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background-color: var(--sodium);
+  color: var(--ink);
+  display: none;
+  flex-direction: column;
+  padding-bottom: var(--s6);
+  overflow-y: auto;
+}
+
+.menu-overlay.is-open { display: flex; }
+
+.menu-overlay-top {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.menu-overlay-links {
+  margin-top: var(--s5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  align-items: flex-start;
+}
+
+.menu-overlay-footer {
+  margin-top: auto;
+  padding-top: var(--s6);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s4);
+}
+
+/* Global pixel overlays */
+#trail-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+}
+
+#wipe-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 120;
+  display: none;
+}
+
+#wipe-canvas.is-active { display: block; }
+
+#confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 130;
+  display: none;
+}
+
+#confetti-canvas.is-active { display: block; }
+
+/* Hero / App Title Header Band */
+.hero-sec {
+  padding-inline: var(--margin);
+  padding-top: var(--s4);
+  padding-bottom: var(--s5);
+  border-bottom: var(--rule-strong);
+}
+
+.hero-top-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s2) var(--s4);
+}
+
+.hero-display-wrap {
+  margin-top: var(--s4);
+}
+
+.hero-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 39 / 11;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .hero-canvas {
+    aspect-ratio: 64 / 9;
+  }
+}
+
+.hero-title-row {
+  margin-top: var(--s4);
+  align-items: end;
+  row-gap: var(--s3);
+}
+
+.app-title {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.app-title:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
+}
+
+.step-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: var(--s4);
+  border-top: var(--rule);
+  border-left: var(--rule);
+}
+
+.step-pill {
+  flex: 1 1 120px;
+  padding: 10px 12px;
+  border-right: var(--rule);
+  border-bottom: var(--rule);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background-color: transparent;
+  color: var(--ink);
+}
+
+.step-pill[aria-current="step"] {
+  background-color: var(--ink);
+  color: var(--sodium);
+}
+
+.step-pill[data-done="true"]:not([aria-current="step"]) {
+  background-color: var(--paper);
+}
+
+/* App Views */
+.container {
+  width: 100%;
+}
+
+.app-view[hidden] {
+  display: none !important;
+}
+
+.workspace-sec {
+  padding-block: var(--sec-pad);
+}
+
+.section-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+
+.view-head-row {
+  padding-bottom: var(--s4);
+  border-bottom: var(--rule-strong);
+  margin-bottom: var(--s5);
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s4);
+}
+
+@media (min-width: 768px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gutter);
+  }
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-group label,
+.section-card > label {
+  font-size: clamp(0.875rem, 0.83rem + 0.2vw, 0.9375rem);
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.helper-text {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  opacity: 0.78;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="text"],
+input[type="search"],
+.text-input,
+.select-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-width: 2px;
+}
+
+/* CA Dropdown */
+.ca-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-toggle {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 42px 10px 14px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.dropdown-toggle::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  transform: translateY(-65%) rotate(45deg);
+}
+
+.dropdown-toggle[aria-expanded="true"]::after {
+  transform: translateY(-35%) rotate(-135deg);
+}
+
+.dropdown-toggle[aria-expanded="true"] {
+  border-width: 2px;
+  background-color: var(--sodium);
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background-color: var(--paper);
+  border: 2px solid var(--ink);
+  max-height: 320px;
+  overflow-y: auto;
+  padding: var(--s2);
+}
+
+.ca-dropdown.is-open .dropdown-menu {
+  display: block;
+}
+
+.ca-sheet-header {
+  display: none;
+}
+
+.ca-sheet-backdrop {
+  display: none;
+}
+
+.ca-add-row {
+  display: flex;
+  gap: var(--s2);
+  padding-bottom: var(--s2);
+  margin-bottom: var(--s2);
+  border-bottom: var(--rule);
+}
+
+.ca-add-row input {
+  height: 40px;
+  padding: 0 10px;
+  font-size: 1rem;
+}
+
+.ca-add-btn {
+  height: 40px;
+  padding: 0 14px;
+  background-color: var(--ink);
+  color: var(--sodium);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ca-option-btn {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  text-align: left;
+  border-bottom: 1px solid rgba(10, 10, 10, 0.12);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.ca-option-btn:last-child { border-bottom: 0; }
+
+.ca-option-btn:hover {
+  background-color: var(--sodium);
+}
+
+.ca-option-btn[aria-selected="true"] {
+  background-color: var(--ink);
+  color: var(--sodium);
+}
+
+.ca-option-box {
+  width: 18px;
+  height: 18px;
+  border: 1px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ca-option-btn[aria-selected="true"] .ca-option-box {
+  background-color: var(--mint);
+  border-color: var(--mint);
+  color: var(--ink);
+}
+
+.selected-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.selected-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background-color: var(--sodium);
+  border: 1px solid var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.selected-tag button {
+  font-weight: 700;
+  padding: 0 2px;
+}
+
+/* Error Chip */
+.error-chip {
+  display: inline-block;
+  background-color: var(--coral);
+  color: var(--paper);
+  padding: 6px 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  align-self: flex-start;
+}
+
+.error-chip[hidden] { display: none; }
+
+/* Page Actions */
+.page-actions {
+  margin-top: var(--s5);
+  padding-top: var(--s4);
+  border-top: var(--rule-strong);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+}
+
+/* Buildings View */
+.building-choices {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gutter);
+}
+
+@media (min-width: 768px) {
+  .building-choices {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.building-card-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding: var(--s4);
+  border: 2px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  min-height: 196px;
+}
+
+.building-card-btn[aria-pressed="true"] {
+  background-color: var(--bldg-color, var(--sodium));
+}
+
+.building-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s2);
+}
+
+.building-check-square {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--ink);
+  background-color: var(--paper);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.building-card-btn[aria-pressed="true"] .building-check-square {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+.building-order-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-bottom: var(--s3);
+  padding: 12px 14px;
+  border: 1px solid var(--ink);
+  background-color: var(--sodium);
+}
+
+.building-order-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: var(--s3);
+  padding-top: 10px;
+  border-top: 1px solid rgba(10, 10, 10, 0.2);
+}
+
+.order-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 6px;
+  background-color: var(--ink);
+  color: var(--sodium);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.order-move-group {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.order-move-btn {
+  width: 40px;
+  height: 38px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.order-move-btn:hover:not(:disabled) {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+.order-move-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Floor Sweep View */
+.sweep-mode-banner {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s2) var(--s3);
+  padding: 12px 16px 15px;
+  background-color: var(--ink);
+  color: var(--sodium);
+  margin-bottom: var(--s4);
+}
+
+.sweep-mode-dot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--mint);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.sweep-mode-hint {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--paper);
+}
+
+.sweep-progress-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.sweep-progress-fill {
+  height: 100%;
+  width: 0%;
+  background-color: var(--mint);
+  transition: width 160ms linear;
+}
+
+.floor-card {
+  border: 2px solid var(--ink);
+  background-color: var(--paper);
+  padding: var(--s4);
+}
+
+.floor-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--s3);
+  padding-bottom: var(--s4);
+  border-bottom: var(--rule);
+}
+
+.floor-band-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  font-weight: 600;
+  border: 1px solid var(--ink);
+  margin-bottom: 8px;
+}
+
+.floor-status-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-top: var(--s4);
+}
+
+.chip-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.chip-toggle:hover {
+  background-color: var(--sodium);
+}
+
+.chip-toggle[aria-pressed="true"] {
+  background-color: var(--ink);
+  color: var(--sodium);
+}
+
+.chip-toggle[data-status="issue"][aria-pressed="true"] {
+  background-color: var(--coral);
+  color: var(--paper);
+}
+
+.chip-toggle[data-status="clear"][aria-pressed="true"] {
+  background-color: var(--mint);
+  color: var(--ink);
+}
+
+.floor-notes-input {
+  width: 100%;
+  min-height: 110px;
+  padding: 12px 14px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.45;
+  resize: vertical;
+  margin-top: 8px;
+}
+
+.snippet-bar {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--ink);
+  background-color: var(--cream);
+}
+
+.snippet-bar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.snippet-swipe-hint {
+  display: none;
+}
+
+.snippet-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.snippet-chip {
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.snippet-chip:hover {
+  background-color: var(--sodium);
+}
+
+.snippet-chip--ca {
+  background-color: var(--ink);
+  color: var(--sodium);
+}
+
+.snippet-chip--ca:hover {
+  background-color: var(--blue);
+  color: var(--ink);
+}
+
+.room-checks-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: var(--rule);
+}
+
+.room-counter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.room-counter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+}
+
+.room-counter-row.has-count {
+  background-color: var(--sodium);
+  border-width: 2px;
+}
+
+.room-counter-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.room-stepper {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.room-stepper-btn {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ink);
+  background-color: var(--ink);
+  color: var(--paper);
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.room-stepper-btn:hover {
+  background-color: var(--blue);
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.room-stepper-input {
+  width: 52px;
+  height: 44px;
+  padding: 0 4px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.storage-check-box {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--ink);
+  background-color: var(--cream);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.storage-check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.storage-check-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.summary-room-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.summary-room-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid var(--ink);
+  background-color: var(--sodium);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.floor-nav-bar {
+  margin-top: var(--s4);
+  padding-top: var(--s4);
+  border-top: var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.building-position {
+  margin-top: var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.floor-pixel-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.floor-pixel-cell {
+  height: 36px;
+  min-width: 48px;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  background-color: var(--paper);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floor-pixel-cell.is-current {
+  background-color: var(--ink);
+  color: var(--sodium);
+}
+
+.floor-pixel-cell.is-visited:not(.is-current) {
+  background-color: var(--mint);
+  color: var(--ink);
+}
+
+/* Summary View */
+.summary-building-block {
+  border-top: var(--rule-strong);
+  padding-top: var(--s4);
+  margin-bottom: var(--s5);
+}
+
+.summary-floor-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s2);
+  padding: 14px 0;
+  border-bottom: var(--rule);
+}
+
+@media (min-width: 768px) {
+  .summary-floor-row {
+    grid-template-columns: 150px 170px 1fr;
+    align-items: center;
+    gap: var(--s3);
+  }
+}
+
+.summary-meta-card {
+  border: 2px solid var(--ink);
+  padding: var(--s4);
+  background-color: var(--paper);
+  margin-bottom: var(--s4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.summary-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s3);
+}
+
+@media (min-width: 768px) {
+  .summary-metrics-grid {
+    grid-template-columns: 110px 1fr;
+    align-items: end;
+  }
+}
+
+.call-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.call-log-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--ink);
+  background-color: var(--cream);
+}
+
+@media (min-width: 768px) {
+  .call-log-row {
+    grid-template-columns: 120px 1fr auto;
+    align-items: center;
+  }
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--ink);
+  background-color: var(--sodium);
+  margin-block: var(--s4);
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--ink);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Preview View (Ink surface) */
+.report-preview {
+  width: 100%;
+  min-height: 360px;
+  padding: var(--s4);
+  border: 1px solid var(--sodium);
+  background-color: #111111;
+  color: var(--paper);
+  font-family: "Inter Tight", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.time-reference {
+  margin-top: var(--s4);
+  padding: 12px 16px;
+  border: 1px solid var(--sodium);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s2) var(--s4);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.copy-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: var(--mint);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+/* Footer */
+.site-footer { padding-top: var(--s7); }
+.footer-logo-svg { display: block; width: 100%; height: auto; }
+.footer-cols { margin-top: var(--s5); row-gap: var(--s4); }
+.footer-block { grid-column: 1 / -1; }
+@media (min-width: 768px) { .footer-block { grid-column: span 4; } }
+.footer-block-head { margin-bottom: var(--s2); }
+.footer-bottom { margin-top: var(--s6); padding-bottom: var(--s5); row-gap: var(--s3); align-items: end; }
+.footer-honesty { grid-column: 1 / -1; }
+.footer-ver { grid-column: 1 / -1; }
+@media (min-width: 1024px) {
+  .footer-honesty { grid-column: 1 / 9; }
+  .footer-ver { grid-column: 9 / 13; text-align: right; }
+}
+.footer-staircase { display: block; width: 100%; height: 8px; }
+
+/* Sticky Mobile Thumb Bar */
+.mobile-thumb-bar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  /* 1. Sticky Bottom Thumb Bar */
+  .mobile-thumb-bar:not([hidden]) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 65;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    padding: 10px var(--margin) calc(10px + env(safe-area-inset-bottom));
+    background-color: var(--paper);
+    border-top: 2px solid var(--ink);
+  }
+
+  .mobile-thumb-bar[data-surface="ink"]:not([hidden]) {
+    background-color: var(--ink);
+    border-top: 2px solid var(--sodium);
+  }
+
+  .mobile-thumb-bar .secondary-button,
+  .mobile-thumb-bar .primary-action {
+    height: 48px;
+    min-height: 48px;
+  }
+
+  .mobile-thumb-bar .primary-action {
+    width: 100%;
+  }
+
+  .mobile-thumb-bar .secondary-button[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  body.has-thumb-bar {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+
+  #view-buildings .page-actions,
+  #view-floor .page-actions,
+  #view-summary .page-actions {
+    display: none;
+  }
+
+  .floor-nav-bar {
+    display: none;
+  }
+
+  /* 2. Collapsible Hero & Sticky Sweep Progress Header */
+  body.mobile-hero-compact .hero-top-meta,
+  body.mobile-hero-compact .hero-display-wrap,
+  body.mobile-hero-compact #hero-cycle-caption {
+    display: none;
+  }
+
+  body.mobile-hero-compact .hero-sec {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  body.mobile-hero-compact .hero-title-row {
+    margin-top: 0;
+  }
+
+  body.mobile-hero-compact .app-title {
+    font-size: 1.0625rem;
+    line-height: 1.2;
+  }
+
+  body.mobile-hero-compact .step-strip {
+    margin-top: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  body.mobile-hero-compact .step-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  body.mobile-hero-compact .step-pill {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    min-height: 36px;
+    white-space: nowrap;
+  }
+
+  body.mobile-hero-compact .workspace-sec {
+    padding-top: 20px;
+    padding-bottom: 32px;
+  }
+
+  .sweep-mode-banner {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 35;
+    margin-inline: calc(var(--margin) * -1);
+    padding: 10px var(--margin) 13px;
+    margin-bottom: var(--s3);
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .sweep-mode-hint {
+    font-size: 0.75rem;
+  }
+
+  .floor-card {
+    padding: 14px;
+  }
+
+  .floor-card-header {
+    padding-bottom: 12px;
+  }
+
+  /* 3. Touch Targets (44px+) & No iOS Input Auto-Zoom */
+  input[type="text"],
+  input[type="number"],
+  input[type="search"],
+  select,
+  .text-input,
+  .select-input {
+    font-size: 1rem !important;
+  }
+
+  .order-move-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.125rem;
+  }
+
+  .snippet-chip {
+    min-height: 44px;
+    padding: 8px 14px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .floor-pixel-cell {
+    height: 44px;
+    min-width: 54px;
+    flex: 0 0 auto;
+  }
+
+  .selected-tag button {
+    min-width: 28px;
+    min-height: 28px;
+  }
+
+  #startTimeNowBtn {
+    min-height: 36px;
+    padding: 4px 8px;
+  }
+
+  /* 4. Horizontal Scroll Strips */
+  .snippet-swipe-hint {
+    display: inline;
+  }
+
+  .snippet-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .snippet-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .floor-pixel-strip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    gap: 6px;
+  }
+
+  .floor-pixel-strip::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 5. Compact Building Cards & Bottom-Sheet CA Selector */
+  .building-order-toolbar {
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+
+  .building-choices {
+    gap: 8px;
+  }
+
+  .building-card-btn {
+    min-height: 0;
+    padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .building-card-top svg {
+    height: 20px;
+    width: auto;
+  }
+
+  .building-order-actions {
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  html.ca-sheet-open {
+    overflow: hidden;
+  }
+
+  .ca-sheet-backdrop:not([hidden]) {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background-color: rgba(10, 10, 10, 0.58);
+  }
+
+  .ca-dropdown.is-open .dropdown-menu {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 85;
+    max-height: 78dvh;
+    border: 2px solid var(--ink);
+    border-bottom: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--paper);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .ca-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px var(--margin);
+    background-color: var(--sodium);
+    border-bottom: 2px solid var(--ink);
+    flex-shrink: 0;
+  }
+
+  .ca-sheet-done {
+    min-height: 44px;
+    padding: 0 16px;
+    background-color: var(--ink);
+    color: var(--sodium);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .ca-dropdown.is-open .ca-add-row {
+    padding: 10px var(--margin);
+    margin-bottom: 0;
+    background-color: var(--cream);
+    flex-shrink: 0;
+  }
+
+  .ca-dropdown.is-open .ca-add-row input {
+    height: 44px;
+  }
+
+  .ca-dropdown.is-open .ca-add-btn {
+    height: 44px;
+  }
+
+  .ca-dropdown.is-open .ca-options-scroll {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px var(--margin) 16px;
+    flex: 1 1 auto;
+  }
+
+  .ca-dropdown.is-open .ca-option-btn {
+    min-height: 48px;
+  }
+}
+</style>
+</head>
+<body data-surface="sodium">
+<a class="skip-link" href="#main">Skip to generator</a>
+
+<header class="site-header" role="banner" data-surface="sodium" id="site-header">
+  <div class="grid header-grid">
+    <a class="logo-link" href="#top" aria-label="MKW/CR, start again" id="header-logo-link" onclick="startAgain(); return false;"></a>
+    <nav class="main-nav" aria-label="Report steps" id="header-nav">
+      <button type="button" class="nav-step-btn t-micro" data-nav-view="view-main" aria-current="step">(01 Main)</button>
+      <button type="button" class="nav-step-btn t-micro" data-nav-view="view-buildings">(02 Buildings)</button>
+      <button type="button" class="nav-step-btn t-micro" data-nav-view="view-floor">(03 Sweep)</button>
+      <button type="button" class="nav-step-btn t-micro" data-nav-view="view-summary">(04 Summary)</button>
+      <button type="button" class="nav-step-btn t-micro" data-nav-view="view-preview">(05 Preview)</button>
+    </nav>
+    <div class="header-actions-desktop">
+      <button type="button" class="btn-text t-micro u-anim" id="motion-toggle-desktop" aria-pressed="true">(Motion: on)</button>
+      <button type="button" class="primary-action btn-sm" onclick="startAgain()"><span>Start again</span></button>
+    </div>
+    <div class="menu-btn-wrap">
+      <button type="button" class="menu-btn t-micro" id="menu-open-btn" aria-expanded="false" aria-controls="menu">(Menu)</button>
+    </div>
+  </div>
+</header>
+
+<div class="menu-overlay" id="menu" role="dialog" aria-modal="true" aria-label="Navigation menu" data-surface="sodium">
+  <div class="menu-overlay-top grid">
+    <span class="col-1-3 t-micro">(Menu)</span>
+    <div class="menu-btn-wrap">
+      <button type="button" class="menu-btn t-micro" id="menu-close-btn">(Close)</button>
+    </div>
+  </div>
+  <div class="grid">
+    <nav class="menu-overlay-links col-full" aria-label="Mobile navigation" id="menu-nav">
+      <button type="button" class="t-h1" data-nav-view="view-main">01. Main</button>
+      <button type="button" class="t-h1" data-nav-view="view-buildings">02. Buildings</button>
+      <button type="button" class="t-h1" data-nav-view="view-floor">03. Sweep</button>
+      <button type="button" class="t-h1" data-nav-view="view-summary">04. Summary</button>
+      <button type="button" class="t-h1" data-nav-view="view-preview">05. Preview</button>
+    </nav>
+    <div class="menu-overlay-footer col-full">
+      <button type="button" class="btn-text t-small u-anim" id="motion-toggle-mobile" aria-pressed="true">(Motion: on)</button>
+      <button type="button" class="primary-action" onclick="startAgain()"><span>Start again</span></button>
+    </div>
+  </div>
+</div>
+
+<main id="main" tabindex="-1">
+  <!-- Hero Strip (Sodium Surface) -->
+  <section class="hero-sec" id="top" data-surface="sodium">
+    <div class="grid" style="padding-inline:0;">
+      <div class="hero-top-meta t-micro tnum">
+        <span>MATTHEWS · KEYES · WALLINGFORD</span>
+        <span>COVERAGE &amp; FLOOR SWEEP WORKFLOW</span>
+      </div>
+    </div>
+
+    <figure class="hero-display-wrap">
+      <canvas class="hero-canvas" id="hero-canvas" aria-hidden="true"></canvas>
+      <figcaption class="visually-hidden">Interactive bitmap banner for MKW Coverage</figcaption>
+    </figure>
+
+    <div class="grid hero-title-row" style="padding-inline:0;">
+      <div class="col-full">
+        <h1 class="app-title t-h1" onclick="startAgain()" role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); startAgain(); }">MKW Report Generator</h1>
+        <p class="t-micro" id="hero-cycle-caption" style="margin-top:8px;">Click title to reset · Click pixel banner to morph</p>
+
+        <div class="step-strip" id="step-strip" aria-label="Workflow progress">
+          <button type="button" class="step-pill t-micro" data-nav-view="view-main" aria-current="step"><span>01 · Main</span><span>→</span></button>
+          <button type="button" class="step-pill t-micro" data-nav-view="view-buildings"><span>02 · Buildings</span><span>→</span></button>
+          <button type="button" class="step-pill t-micro" data-nav-view="view-floor"><span>03 · Sweep</span><span>→</span></button>
+          <button type="button" class="step-pill t-micro" data-nav-view="view-summary"><span>04 · Summary</span><span>→</span></button>
+          <button type="button" class="step-pill t-micro" data-nav-view="view-preview"><span>05 · Preview</span><span>■</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Active Workspace Container -->
+  <section class="workspace-sec" id="workspace" data-surface="paper">
+    <div class="container">
+
+      <!-- VIEW 1: MAIN -->
+      <div id="view-main" class="app-view active">
+        <div class="grid">
+          <p class="col-1-3 t-micro">(01 · Main)</p>
+          <div class="col-5-12">
+            <div class="section-card">
+              <div class="view-head-row">
+                <h2 class="t-h2">Main</h2>
+                <p class="t-body" style="margin-top:8px;">Set the coverage date, Lead CA, Support CAs, and shift start time.</p>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="field-group">
+                  <label for="reportDate">Date</label>
+                  <input type="date" id="reportDate">
+                </div>
+                <div class="field-group">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;">
+                    <label for="startTime">Start Time</label>
+                    <button type="button" class="btn-text t-micro u-anim" id="startTimeNowBtn">(Now)</button>
+                  </div>
+                  <input type="time" id="startTime">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="leadCA">Lead CA <span class="t-micro" style="font-weight:400;opacity:0.75;">(Optional)</span></label>
+                <div class="ca-dropdown" id="leadCA" data-placeholder="Select one lead CA">
+                  <button type="button" class="dropdown-toggle" onclick="toggleCADropdown(this)" aria-expanded="false">Select one lead CA</button>
+                  <div class="dropdown-menu" role="group" aria-label="Lead CA choices"></div>
+                </div>
+                <div class="helper-text">Names auto-format as LAST, First in Main and at the start of sweeps; use LAST NAME in notes.</div>
+              </div>
+
+              <div class="field-group">
+                <label for="supportCAs">Support CAs</label>
+                <div class="ca-dropdown" id="supportCAs" data-placeholder="Select up to 5 support CAs" data-max="5">
+                  <button type="button" class="dropdown-toggle" onclick="toggleCADropdown(this)" aria-expanded="false">Select up to 5 support CAs</button>
+                  <div class="dropdown-menu" role="group" aria-label="Support CA choices"></div>
+                </div>
+                <div class="selected-tags-row" id="supportCAs-tags"></div>
+              </div>
+
+              <div class="page-actions" style="justify-content:flex-end;">
+                <button type="button" class="primary-action" onclick="goToBuildings()"><span>Next: Choose Buildings</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: BUILDINGS -->
+      <div id="view-buildings" class="app-view" hidden>
+        <div class="grid">
+          <p class="col-1-3 t-micro">(02 · Buildings)</p>
+          <div class="col-5-12">
+            <div class="section-card">
+              <div class="view-head-row">
+                <h2 class="t-h2">Buildings &amp; Sweep Order</h2>
+                <p class="helper-text" style="margin-top:8px;">Select every building to cover and use ← / → to set the exact sweep order. Each building sweeps top to bottom.</p>
+              </div>
+
+              <div class="building-order-toolbar">
+                <div>
+                  <span class="t-micro">ACTIVE ROUTE</span>
+                  <div id="buildingOrderReadout" class="t-small fw-600" style="margin-top:4px;"></div>
+                </div>
+              </div>
+
+              <div id="buildingChoices" class="building-choices"></div>
+              <span class="error-chip" id="buildings-error" hidden>Select at least one building to begin the sweep.</span>
+            </div>
+
+            <div class="page-actions">
+              <button type="button" class="secondary-button" onclick="showView('view-main')">Back</button>
+              <button type="button" class="primary-action" onclick="startSweep()"><span>Next: Start Sweep</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: FLOOR BY FLOOR SWEEP -->
+      <div id="view-floor" class="app-view" hidden>
+        <div class="grid">
+          <p class="col-1-3 t-micro">(03 · Floor Sweep)</p>
+          <div class="col-5-12">
+            <div class="sweep-mode-banner" id="sweepModeBanner">
+              <span class="sweep-mode-dot" id="sweepBannerDot"></span>
+              <span class="t-small fw-600" id="sweepBannerTitle">Sweep in progress</span>
+              <span class="sweep-mode-hint tnum" id="sweepBannerHint">Top to bottom</span>
+              <div class="sweep-progress-track" aria-hidden="true">
+                <div class="sweep-progress-fill" id="sweepProgressFill"></div>
+              </div>
+            </div>
+
+            <div id="floorViewContent"></div>
+            <div id="globalFloorPosition" class="building-position"></div>
+
+            <div class="page-actions">
+              <button type="button" class="secondary-button" onclick="showView('view-buildings')">Back</button>
+              <button type="button" class="primary-action" id="floorNextBtn" onclick="finishSweep()"><span>Next</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: SUMMARY -->
+      <div id="view-summary" class="app-view" hidden>
+        <div class="grid">
+          <p class="col-1-3 t-micro">(04 · Summary)</p>
+          <div class="col-5-12">
+            <div class="view-head-row">
+              <h2 class="t-h2">Sweep &amp; Coverage Summary</h2>
+              <p class="t-body" style="margin-top:8px;">Review floor notes and fill in shift summary counts (IRs, SOCs, calls, work orders) for the template.</p>
+            </div>
+
+            <div id="sweepSummaryFields"></div>
+
+            <div class="summary-meta-card">
+              <p class="t-micro">(COVERAGE SUMMARY FIELDS)</p>
+
+              <div class="field-group">
+                <label>Shift Pace &amp; Trends</label>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                  <button type="button" class="chip-toggle" id="shiftQuietBtn" aria-pressed="true">Shift was quiet</button>
+                  <button type="button" class="chip-toggle" id="shiftBusyBtn" aria-pressed="false">Shift was busy</button>
+                </div>
+                <input type="text" id="shiftTrendNotes" class="text-input" placeholder="Optional trend details (e.g., lots of students studying in common rooms)">
+              </div>
+
+              <div class="summary-metrics-grid">
+                <div class="field-group">
+                  <label for="irCount">IRs</label>
+                  <input type="number" inputmode="numeric" pattern="[0-9]*" id="irCount" class="text-input" min="0" value="0">
+                </div>
+                <div class="field-group">
+                  <label for="irDetails">IncidentID(s) &amp; Noise Warnings</label>
+                  <input type="text" id="irDetails" class="text-input" placeholder="e.g., IncidentID: 4532 and 1 noise warning was given">
+                </div>
+              </div>
+
+              <div class="summary-metrics-grid">
+                <div class="field-group">
+                  <label for="socCount">SOCs</label>
+                  <input type="number" inputmode="numeric" pattern="[0-9]*" id="socCount" class="text-input" min="0" value="0">
+                </div>
+                <div class="field-group">
+                  <label for="socDetails">ConcernID(s)</label>
+                  <input type="text" id="socDetails" class="text-input" placeholder="e.g., ConcernID: 4532">
+                </div>
+              </div>
+
+              <div class="summary-metrics-grid">
+                <div class="field-group">
+                  <label for="woCount">Work Orders</label>
+                  <input type="number" inputmode="numeric" pattern="[0-9]*" id="woCount" class="text-input" min="0" value="0">
+                </div>
+                <div class="field-group">
+                  <label for="woRoomIds">RoomSpaceID(s)</label>
+                  <input type="text" id="woRoomIds" class="text-input" placeholder="e.g., RoomSpaceID: 6924">
+                </div>
+              </div>
+
+              <div class="field-group">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                  <label>Coverage Phone Calls Received (<span id="callsCountLabel">0</span>)</label>
+                  <button type="button" class="secondary-button" id="addCallBtn" style="min-height:44px;height:44px;padding:0 14px;font-size:0.875rem;">+ Add Call</button>
+                </div>
+                <div id="callLogsContainer" class="call-log-list"></div>
+              </div>
+            </div>
+
+            <div class="field-group" style="margin-bottom:24px;">
+              <label for="generalNotes">Additional Summary Bullets (Optional)</label>
+              <textarea id="generalNotes" class="floor-notes-input" placeholder="Any extra coverage notes or attendance details..."></textarea>
+            </div>
+
+            <div class="checkbox-group">
+              <input type="checkbox" id="onTimeCheck" checked>
+              <label for="onTimeCheck" style="margin:0;cursor:pointer;">All CAs were on time for coverage and sweeps.</label>
+            </div>
+
+            <div class="page-actions">
+              <button type="button" class="secondary-button" onclick="showView('view-floor')">Back</button>
+              <button type="button" class="primary-action" onclick="generateReport()"><span>Preview Report</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: PREVIEW -->
+      <div id="view-preview" class="app-view" hidden>
+        <div class="grid">
+          <p class="col-1-3 t-micro">(05 · Preview)</p>
+          <div class="col-5-12">
+            <div class="section-card">
+              <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:12px;">
+                <h2 class="t-h2 t-paper">Report Preview</h2>
+                <span class="copy-badge" id="copyStatusBadge" hidden>Copied to clipboard</span>
+              </div>
+              <label for="reportPreview" class="t-sodium">MKW Coverage Report Template output (no timestamps in floor notes)</label>
+              <textarea id="reportPreview" class="report-preview" readonly></textarea>
+            </div>
+
+            <div id="timeReference" class="time-reference" aria-live="polite"></div>
+
+            <div class="page-actions">
+              <button type="button" class="secondary-button" onclick="showView('view-summary')">Back</button>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <button type="button" class="secondary-button" onclick="copySection('sweep')">Copy Sweep Notes</button>
+                <button type="button" class="secondary-button" onclick="copySection('summary')">Copy Summary</button>
+                <button type="button" class="primary-action" onclick="copyReport()"><span>Copy Full Report</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<div class="ca-sheet-backdrop" id="caSheetBackdrop" hidden></div>
+<div class="mobile-thumb-bar" id="mobileThumbBar" data-surface="paper" hidden>
+  <button type="button" class="secondary-button" id="mobileThumbLeftBtn">← Back</button>
+  <button type="button" class="primary-action" id="mobileThumbRightBtn"><span>Next</span></button>
+</div>
+
+<footer class="site-footer" role="contentinfo" data-surface="ink" id="site-footer"></footer>
+
+<canvas id="trail-canvas" aria-hidden="true"></canvas>
+<canvas id="wipe-canvas" aria-hidden="true"></canvas>
+<canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+<script>
+"use strict";
+
+const TOKENS = {
+  sodium: "#B9E6EC",
+  ink: "#0A0A0A",
+  paper: "#FFFFFF",
+  cream: "#FFFDE8",
+  blue: "#6282E5",
+  pink: "#EB89B2",
+  green: "#E7C434",
+  lavender: "#6282E5",
+  coral: "#A61127",
+  mint: "#E7C434",
+  espresso: "#482521"
+};
+
+const TRACK_COLORS = [TOKENS.pink, TOKENS.green, TOKENS.blue, TOKENS.coral];
+const TRAIL_COLORS = [TOKENS.pink, TOKENS.green, TOKENS.blue, TOKENS.coral, TOKENS.sodium, TOKENS.espresso];
+
+const GLYPHS = {
+  "0": [".#####.","#.....#","#....##","#...#.#","#..#..#","#.#...#","##....#","#.....#",".#####."],
+  "1": ["...#...","..##...",".#.#...","...#...","...#...","...#...","...#...","...#...",".#####."],
+  "2": [".#####.","#.....#","......#",".....#.","...##..","..#....",".#.....","#......","#######"],
+  "3": [".#####.","#.....#","......#","......#","..####.","......#","......#","#.....#",".#####."],
+  "4": ["....##.","...#.#.","..#..#.",".#...#.","#....#.","#######",".....#.",".....#.",".....#."],
+  "5": ["#######","#......","#......","######.","......#","......#","......#","#.....#",".#####."],
+  "6": ["..####.",".#.....","#......","#......","######.","#.....#","#.....#","#.....#",".#####."],
+  "7": ["#######","......#",".....#.","....#..","...#...","...#...","..#....","..#....","..#...."],
+  "/": ["....##","....#.","....#.","...#..","...#..","..#...","..#...",".#....","##...."],
+  " ": ["...","...","...","...","...","...","...","...","..."],
+  "A": ["..###..",".#...#.","#.....#","#.....#","#.....#","#######","#.....#","#.....#","#.....#"],
+  "C": [".#####.","#.....#","#......","#......","#......","#......","#......","#.....#",".#####."],
+  "E": ["#######","#......","#......","#......","######.","#......","#......","#......","#######"],
+  "G": [".#####.","#.....#","#......","#......","#..####","#.....#","#.....#","#.....#",".#####."],
+  "K": ["#....#.","#...#..","#..#...","#.#....","##.....","#.#....","#..#...","#...#..","#....#."],
+  "M": ["#.....#","##...##","#.#.#.#","#..#..#","#.....#","#.....#","#.....#","#.....#","#.....#"],
+  "O": [".#####.","#.....#","#.....#","#.....#","#.....#","#.....#","#.....#","#.....#",".#####."],
+  "P": ["######.","#.....#","#.....#","#.....#","######.","#......","#......","#......","#......"],
+  "R": ["######.","#.....#","#.....#","#.....#","######.","#...#..","#....#.","#.....#","#.....#"],
+  "S": [".#####.","#.....#","#......","#......",".#####.","......#","......#","#.....#",".#####."],
+  "T": ["#######","...#...","...#...","...#...","...#...","...#...","...#...","...#...","...#..."],
+  "V": ["#.....#","#.....#","#.....#","#.....#","#.....#",".#...#.",".#...#.","..#.#..","...#..."],
+  "W": ["#.....#","#.....#","#.....#","#.....#","#..#..#","#.#.#.#","##...##","#.....#","#.....#"]
+};
+
+const GLYPHS_BOLD = {
+  " ": ["...","...","...","...","...","...","...","...","..."],
+  "A": ["..###..",".#####.","##...##","##...##","#######","#######","##...##","##...##","##...##"],
+  "C": [".#####.","#######","##.....","##.....","##.....","##.....","##.....","#######",".#####."],
+  "E": ["#######","#######","##.....","######.","######.","##.....","##.....","#######","#######"],
+  "F": ["#######","#######","##.....","######.","######.","##.....","##.....","##.....","##....."],
+  "G": [".#####.","#######","##.....","##.....","##.####","##...##","##...##","#######",".#####."],
+  "K": ["##...##","##..##.","##.##..","####...","####...","##.##..","##..##.","##...##","##...##"],
+  "L": ["##.....","##.....","##.....","##.....","##.....","##.....","##.....","#######","#######"],
+  "M": ["##...##","###.###","#######","##.#.##","##...##","##...##","##...##","##...##","##...##"],
+  "O": [".#####.","#######","##...##","##...##","##...##","##...##","##...##","#######",".#####."],
+  "P": ["######.","#######","##...##","##...##","#######","##.....","##.....","##.....","##....."],
+  "R": ["######.","#######","##...##","##...##","#######","##.##..","##..##.","##...##","##...##"],
+  "S": [".#####.","#######","##.....",".#####.","..#####",".....##","##...##","#######",".#####."],
+  "T": ["#######","#######","..###..","..###..","..###..","..###..","..###..","..###..","..###.."],
+  "V": ["##...##","##...##","##...##","##...##","##...##",".##.##.",".##.##.","..###..","...#..."],
+  "W": ["##...##","##...##","##...##","##...##","##.#.##","#######","###.###","##...##","##...##"],
+  "/": ["....##","....##","...##.","...##.","..##..","..##..",".##...","##....","##...."],
+  "2": [".#####.","#######","##...##","....###","..####.",".###...","##.....","#######","#######"],
+  "7": ["#######","#######",".....##","....##.","...##..","..##...","..##...","..##...","..##..."]
+};
+
+const BUILDINGS = [
+  {
+    id: "matthews",
+    code: "M",
+    name: "Matthews Hall",
+    color: TOKENS.pink,
+    floors: ["Floor 4", "Floor 3", "Floor 2", "Floor 1", "Basement"]
+  },
+  {
+    id: "keyes",
+    code: "K",
+    name: "Mary E. Keyes",
+    color: TOKENS.green,
+    floors: ["Floor 6", "Floor 5", "Floor 4", "Floor 3", "Floor 2", "Floor 1", "Basement"]
+  },
+  {
+    id: "wallingford",
+    code: "W",
+    name: "Wallingford Hall",
+    color: TOKENS.lavender,
+    floors: ["Floor 3", "Floor 2", "Floor 1", "Basement"]
+  }
+];
+
+const FLOOR_CONFIGS = {
+  "matthews::Basement": {
+    defaultStatus: "Quiet",
+    rooms: [
+      "Study Room B143/A",
+      "Study Room B144",
+      "Study Room B145",
+      "Study Room B106",
+      "Games Room B131",
+      "Laundry Room"
+    ],
+    storageRoomsNote: "Storage rooms: B113, B114, B110, B122, B133, B140"
+  },
+  "matthews::Floor 1": {
+    defaultStatus: "Quiet",
+    rooms: ["North Common Room", "Center Common Room", "East Common Room"]
+  },
+  "matthews::Floor 2": { defaultStatus: "Quiet", rooms: [] },
+  "matthews::Floor 3": { defaultStatus: "Quiet", rooms: [] },
+  "matthews::Floor 4": { defaultStatus: "Quiet. Roof access locked.", rooms: [] },
+
+  "keyes::Basement": {
+    defaultStatus: "Quiet",
+    rooms: ["Piano Room B116", "Laundry Room"]
+  },
+  "keyes::Floor 1": {
+    defaultStatus: "Quiet",
+    rooms: ["Affinity Group Meeting Room"]
+  },
+  "keyes::Floor 2": {
+    defaultStatus: "Quiet",
+    rooms: ["Meeting Room", "Study Room", "Games Room"]
+  },
+  "keyes::Floor 3": { defaultStatus: "Quiet", rooms: ["Study Room"] },
+  "keyes::Floor 4": { defaultStatus: "Quiet", rooms: ["Study Room"] },
+  "keyes::Floor 5": { defaultStatus: "Quiet", rooms: ["Study Room"] },
+  "keyes::Floor 6": { defaultStatus: "Quiet", rooms: ["Study Room"] },
+
+  "wallingford::Basement": {
+    defaultStatus: "Quiet",
+    rooms: [
+      "Multi-Purpose Room B102",
+      "TV Lounge B104",
+      "Study Room B103/A",
+      "Study Room B103/B",
+      "Study Room B108",
+      "Study Room B109"
+    ]
+  },
+  "wallingford::Floor 1": { defaultStatus: "Quiet", rooms: ["Tea Room"] },
+  "wallingford::Floor 2": { defaultStatus: "Quiet", rooms: [] },
+  "wallingford::Floor 3": { defaultStatus: "Quiet", rooms: [] }
+};
+
+const DEFAULT_CAS = [
+  "Alyssa Rocha",
+  "Amanpreet Anand",
+  "Andreea Ichim",
+  "Angel Saka",
+  "Arooj Awan",
+  "Astra Sreeja Selvaraj",
+  "Emitis Pasandideh Gholamali",
+  "Japleen Saini",
+  "Japnaam Kamboj",
+  "Joel Douma",
+  "Mahi Prajapati",
+  "Mili Shah Shah",
+  "Tazeen Hemraj",
+  "Tiffany Nkonge",
+  "Tvisha Patel",
+  "Zaina Shaikh",
+  "Zariah Lennon"
+];
+
+const OLD_PLACEHOLDER_CAS = new Set([
+  "Zariah Lennon",
+  "Amina Patel",
+  "Jordan Chen",
+  "Maya Brooks",
+  "Liam O'Connor",
+  "Noah Alvarez",
+  "Chloe Tremblay",
+  "Samira Hassan"
+]);
+
+function loadCARoster() {
+  const v2 = storageGet("mkw.caRoster.v2", null);
+  if (Array.isArray(v2) && v2.length > 0) return v2;
+  const legacy = storageGet("mkw.caRoster", []);
+  const extras = Array.isArray(legacy)
+    ? legacy.filter(n => n && !OLD_PLACEHOLDER_CAS.has(n) && !DEFAULT_CAS.includes(n))
+    : [];
+  const merged = DEFAULT_CAS.concat(extras);
+  storageSet("mkw.caRoster.v2", merged);
+  return merged;
+}
+
+function storageGet(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw === null ? fallback : JSON.parse(raw);
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function storageSet(key, val) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(val));
+  } catch (e) {}
+}
+
+function esc(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function hashStr(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function makeRng(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0;
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function cubicBezier(x1, y1, x2, y2) {
+  return function (t) {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    let lo = 0, hi = 1, u = t;
+    for (let i = 0; i < 12; i++) {
+      u = (lo + hi) * 0.5;
+      const mu = 1 - u;
+      const x = 3 * mu * mu * u * x1 + 3 * mu * u * u * x2 + u * u * u;
+      if (x < t) lo = u;
+      else hi = u;
+    }
+    const mu = 1 - u;
+    return 3 * mu * mu * u * y1 + 3 * mu * u * u * y2 + u * u * u;
+  };
+}
+
+const easeMorph = cubicBezier(0.7, 0, 0.3, 1);
+const easeAssemble = cubicBezier(0.2, 0, 0, 1);
+
+function layoutGlyphLines(lines, gapRows, useBold) {
+  const gap = gapRows || 2;
+  const set = useBold ? GLYPHS_BOLD : GLYPHS;
+  let maxCols = 0;
+  const cells = [];
+  let rowOffset = 0;
+  for (let l = 0; l < lines.length; l++) {
+    const str = lines[l];
+    let colOffset = 0;
+    for (let i = 0; i < str.length; i++) {
+      const ch = str[i];
+      const g = set[ch] || set[" "];
+      const w = g[0].length;
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < w; c++) {
+          if (g[r][c] === "#") cells.push({ x: colOffset + c, y: rowOffset + r });
+        }
+      }
+      colOffset += w + (i < str.length - 1 ? 1 : 0);
+    }
+    if (colOffset > maxCols) maxCols = colOffset;
+    rowOffset += 9 + (l < lines.length - 1 ? gap : 0);
+  }
+  return { cols: maxCols, rows: rowOffset, cells };
+}
+
+function svgBitmapText(str, cellH, fill, opts) {
+  const o = opts || {};
+  const layout = layoutGlyphLines(Array.isArray(str) ? str : [str], 2, Boolean(o.bold));
+  const vbW = layout.cols * 5;
+  const vbH = layout.rows * 4;
+  const color = fill || "currentColor";
+  let rects = "";
+  if (o.perCell) {
+    for (let i = 0; i < layout.cells.length; i++) {
+      const cell = layout.cells[i];
+      rects += `<rect x="${cell.x * 5}" y="${cell.y * 4}" width="5" height="4" data-gx="${cell.x}" data-gy="${cell.y}"/>`;
+    }
+  } else {
+    const rowMap = new Map();
+    for (let i = 0; i < layout.cells.length; i++) {
+      const cell = layout.cells[i];
+      if (!rowMap.has(cell.y)) rowMap.set(cell.y, []);
+      rowMap.get(cell.y).push(cell.x);
+    }
+    rowMap.forEach((xs, y) => {
+      xs.sort((a, b) => a - b);
+      let start = xs[0], prev = xs[0];
+      for (let k = 1; k <= xs.length; k++) {
+        if (k < xs.length && xs[k] === prev + 1) prev = xs[k];
+        else {
+          const span = prev - start + 1;
+          rects += `<rect x="${start * 5}" y="${y * 4}" width="${span * 5}" height="4.04"/>`;
+          if (k < xs.length) { start = xs[k]; prev = xs[k]; }
+        }
+      }
+    });
+  }
+  const wAttr = o.fluid ? `width="100%"` : `width="${layout.cols * cellH * 1.25}" height="${layout.rows * cellH}"`;
+  const cls = o.className ? ` class="${esc(o.className)}"` : "";
+  const aria = o.ariaHidden ? ` aria-hidden="true"` : "";
+  return `<svg${cls} viewBox="0 0 ${vbW} ${vbH}" ${wAttr} shape-rendering="crispEdges" fill="${color}"${aria}>${rects}</svg>`;
+}
+
+// Motion Scheduler
+const motion = (() => {
+  const subs = new Set();
+  let rafId = 0;
+  function tick(now) {
+    rafId = 0;
+    if (document.visibilityState === "hidden" || subs.size === 0) return;
+    for (const fn of Array.from(subs)) {
+      try { fn(now); } catch (e) { subs.delete(fn); }
+    }
+    if (subs.size > 0 && document.visibilityState !== "hidden") {
+      rafId = window.requestAnimationFrame(tick);
+    }
+  }
+  function ensure() {
+    if (!rafId && subs.size > 0 && document.visibilityState !== "hidden") {
+      rafId = window.requestAnimationFrame(tick);
+    }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      if (rafId) { window.cancelAnimationFrame(rafId); rafId = 0; }
+    } else ensure();
+  });
+  return {
+    add(fn) { subs.add(fn); ensure(); },
+    remove(fn) {
+      subs.delete(fn);
+      if (subs.size === 0 && rafId) { window.cancelAnimationFrame(rafId); rafId = 0; }
+    }
+  };
+})();
+
+const prefersReduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const savedMotion = storageGet("mkw.motion", null);
+
+const appState = {
+  motionOn: savedMotion === null ? !prefersReduce : Boolean(savedMotion),
+  currentView: "view-main",
+  caRoster: loadCARoster(),
+  leadCA: "",
+  supportCAs: [],
+  selectedBuildings: ["matthews", "keyes", "wallingford"],
+  buildingSweepCAs: {},
+  sweepQueue: [],
+  sweepIndex: 0,
+  floorData: {},
+  sweepEndTime: "",
+  shiftTone: "quiet",
+  callsLog: [],
+  lastSections: { sweep: "", summary: "" }
+};
+
+if (!Array.isArray(appState.caRoster) || appState.caRoster.length === 0) {
+  appState.caRoster = DEFAULT_CAS.slice();
+}
+
+function setMotionState(on) {
+  appState.motionOn = Boolean(on);
+  storageSet("mkw.motion", appState.motionOn);
+  document.documentElement.classList.toggle("motion-on", appState.motionOn);
+  const label = appState.motionOn ? "(Motion: on)" : "(Motion: off)";
+  ["motion-toggle-desktop", "motion-toggle-mobile"].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.textContent = label;
+      btn.setAttribute("aria-pressed", appState.motionOn ? "true" : "false");
+    }
+  });
+  window.dispatchEvent(new CustomEvent("raster:motionchange", { detail: { on: appState.motionOn } }));
+}
+
+// Pixel wipe transition
+const wipeCanvas = document.getElementById("wipe-canvas");
+let wipeActive = false;
+function playWipe(onFull) {
+  if (!appState.motionOn || wipeActive) {
+    if (onFull) onFull();
+    return;
+  }
+  const ctx = wipeCanvas.getContext("2d");
+  if (!ctx) { if (onFull) onFull(); return; }
+  wipeActive = true;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  wipeCanvas.width = Math.round(w * dpr);
+  wipeCanvas.height = Math.round(h * dpr);
+  wipeCanvas.classList.add("is-active");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const cell = w >= 768 ? 48 : 32;
+  const cols = Math.ceil(w / cell);
+  const rows = Math.ceil(h / cell);
+  const maxDiag = cols + rows - 2 || 1;
+  const start = performance.now();
+  let swapped = false;
+
+  function step(now) {
+    const elapsed = now - start;
+    ctx.clearRect(0, 0, w, h);
+    if (elapsed < 170) {
+      const limit = (elapsed / 170) * (maxDiag + 1);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (c + r <= limit) {
+            ctx.fillStyle = TRACK_COLORS[(c + r) % 4];
+            ctx.fillRect(c * cell, r * cell, cell, cell);
+          }
+        }
+      }
+    } else {
+      if (!swapped) {
+        swapped = true;
+        if (onFull) onFull();
+      }
+      const prog = Math.min(1, (elapsed - 170) / 170);
+      const limit = prog * (maxDiag + 1);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (c + r > limit) {
+            ctx.fillStyle = TRACK_COLORS[(c + r) % 4];
+            ctx.fillRect(c * cell, r * cell, cell, cell);
+          }
+        }
+      }
+      if (prog >= 1) {
+        wipeCanvas.classList.remove("is-active");
+        wipeActive = false;
+        motion.remove(step);
+        return;
+      }
+    }
+  }
+  motion.add(step);
+}
+
+// Cursor Pixel Trail
+function initTrail() {
+  if (!window.matchMedia || !window.matchMedia("(pointer: fine)").matches) return;
+  const trailCanvas = document.getElementById("trail-canvas");
+  let trailCells = [];
+  let trailRunning = false;
+  let trailColorIdx = 0;
+  let lastKey = "";
+
+  function sizeTrail() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    trailCanvas.width = Math.round(w * dpr);
+    trailCanvas.height = Math.round(h * dpr);
+    const ctx = trailCanvas.getContext("2d");
+    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function tickTrail(now) {
+    const ctx = trailCanvas.getContext("2d");
+    if (!ctx) { trailRunning = false; motion.remove(tickTrail); return; }
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    if (!appState.motionOn) { trailCells = []; trailRunning = false; motion.remove(tickTrail); return; }
+    const alive = [];
+    for (let i = 0; i < trailCells.length; i++) {
+      const c = trailCells[i];
+      const age = now - c.born;
+      if (age >= 420) continue;
+      alive.push(c);
+      ctx.fillStyle = c.color;
+      if (age < 140) ctx.fillRect(c.gx * 16, c.gy * 16, 16, 16);
+      else if (age < 280) ctx.fillRect(c.gx * 16 + 4, c.gy * 16 + 4, 8, 8);
+      else ctx.fillRect(c.gx * 16 + 6, c.gy * 16 + 6, 4, 4);
+    }
+    trailCells = alive;
+    if (trailCells.length === 0) { trailRunning = false; motion.remove(tickTrail); }
+  }
+
+  sizeTrail();
+  window.addEventListener("resize", sizeTrail, { passive: true });
+  window.addEventListener("pointermove", e => {
+    if (!appState.motionOn || document.documentElement.classList.contains("menu-open")) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const surfEl = el && el.closest ? el.closest("[data-surface]") : null;
+    const surf = surfEl ? surfEl.getAttribute("data-surface") : "sodium";
+    if (surf === "ink") return;
+    const gx = Math.floor(e.clientX / 16);
+    const gy = Math.floor(e.clientY / 16);
+    const key = `${gx},${gy}`;
+    if (key === lastKey) return;
+    lastKey = key;
+    const color = TRAIL_COLORS[trailColorIdx % TRAIL_COLORS.length];
+    trailColorIdx++;
+    trailCells.push({ gx, gy, born: performance.now(), color });
+    if (trailCells.length > 14) trailCells.shift();
+    if (!trailRunning) { trailRunning = true; motion.add(tickTrail); }
+  }, { passive: true });
+}
+
+// Chrome & Footer
+function initChrome() {
+  const logoLink = document.getElementById("header-logo-link");
+  logoLink.innerHTML = svgBitmapText("MKW/CR", 3, "currentColor", {
+    perCell: true,
+    className: "logo-svg",
+    ariaHidden: true
+  });
+
+  if (window.matchMedia && window.matchMedia("(pointer: fine)").matches) {
+    let jitterTimer = 0;
+    logoLink.addEventListener("mouseenter", () => {
+      if (!appState.motionOn) return;
+      const rects = Array.from(logoLink.querySelectorAll("rect"));
+      const dirs = [[5, 0], [-5, 0], [0, 4], [0, -4], [5, 4], [-5, -4]];
+      const rng = makeRng(Date.now());
+      let step = 0;
+      window.clearInterval(jitterTimer);
+      const apply = () => {
+        step++;
+        if (step > 3) {
+          rects.forEach(r => {
+            r.setAttribute("x", String(Number(r.dataset.gx) * 5));
+            r.setAttribute("y", String(Number(r.dataset.gy) * 4));
+          });
+          window.clearInterval(jitterTimer);
+          return;
+        }
+        rects.forEach(r => {
+          const bx = Number(r.dataset.gx) * 5;
+          const by = Number(r.dataset.gy) * 4;
+          if (step === 3) {
+            r.setAttribute("x", String(bx));
+            r.setAttribute("y", String(by));
+          } else {
+            const d = dirs[Math.floor(rng() * dirs.length)];
+            r.setAttribute("x", String(bx + d[0]));
+            r.setAttribute("y", String(by + d[1]));
+          }
+        });
+      };
+      apply();
+      jitterTimer = window.setInterval(apply, 60);
+    });
+  }
+
+  const footer = document.getElementById("site-footer");
+  const stairCells = 96;
+  let stairRects = "";
+  for (let i = 0; i < stairCells; i++) {
+    const col = TRACK_COLORS[Math.floor(i / 4) % 4];
+    stairRects += `<rect x="${i}" y="0" width="1" height="1" fill="${col}"/>`;
+  }
+  footer.innerHTML = `
+    <div class="grid">
+      <div class="col-full">
+        ${svgBitmapText("MKW/CR", 10, TOKENS.sodium, { fluid: true, className: "footer-logo-svg", ariaHidden: true })}
+      </div>
+    </div>
+    <div class="grid footer-cols">
+      <div class="footer-block">
+        <p class="t-micro footer-block-head">(Buildings)</p>
+        <p class="t-small">Matthews Hall (M)<br>Mary E. Keyes (K)<br>Wallingford Hall (W)</p>
+      </div>
+      <div class="footer-block">
+        <p class="t-micro footer-block-head">(Workflow)</p>
+        <p class="t-small">01 Main → 02 Buildings<br>03 Floor-by-Floor Sweep<br>04 Summary → 05 Preview</p>
+      </div>
+      <div class="footer-block">
+        <p class="t-micro footer-block-head">(Actions)</p>
+        <p class="t-small"><button type="button" class="btn-text t-small u-anim" onclick="startAgain()">(Start new report)</button></p>
+      </div>
+    </div>
+    <div class="grid footer-bottom">
+      <p class="footer-honesty t-small">All report generation happens locally in your browser.</p>
+      <p class="footer-ver t-micro">RASTER/27 SYSTEM · MKW</p>
+    </div>
+    <svg class="footer-staircase" viewBox="0 0 ${stairCells} 1" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true">${stairRects}</svg>
+  `;
+
+  document.getElementById("motion-toggle-desktop").addEventListener("click", () => setMotionState(!appState.motionOn));
+  document.getElementById("motion-toggle-mobile").addEventListener("click", () => setMotionState(!appState.motionOn));
+  setMotionState(appState.motionOn);
+
+  const menuEl = document.getElementById("menu");
+  const openBtn = document.getElementById("menu-open-btn");
+  const closeBtn = document.getElementById("menu-close-btn");
+
+  function closeMenu(returnFocus) {
+    menuEl.classList.remove("is-open");
+    document.documentElement.classList.remove("menu-open");
+    openBtn.setAttribute("aria-expanded", "false");
+    if (returnFocus) openBtn.focus();
+  }
+
+  openBtn.addEventListener("click", () => {
+    playWipe(() => {
+      menuEl.classList.add("is-open");
+      document.documentElement.classList.add("menu-open");
+      openBtn.setAttribute("aria-expanded", "true");
+      closeBtn.focus();
+    });
+  });
+  closeBtn.addEventListener("click", () => closeMenu(true));
+  menuEl.addEventListener("keydown", e => {
+    if (e.key === "Escape") { e.preventDefault(); closeMenu(true); }
+  });
+
+  document.querySelectorAll("[data-nav-view]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.navView;
+      if (target === "view-floor" && appState.sweepQueue.length === 0) {
+        buildSweepQueue();
+      }
+      if (target === "view-summary" && appState.sweepQueue.length === 0) {
+        buildSweepQueue();
+      }
+      if (target === "view-preview") {
+        if (appState.sweepQueue.length === 0) buildSweepQueue();
+        generateReport();
+        closeMenu(false);
+        return;
+      }
+      closeMenu(false);
+      showView(target);
+    });
+  });
+
+  const header = document.getElementById("site-header");
+  const syncHeaderSurface = () => {
+    const hero = document.getElementById("top");
+    const ws = document.getElementById("workspace");
+    const hh = header.getBoundingClientRect().height || 64;
+    const y = hh + 4;
+    const wsRect = ws.getBoundingClientRect();
+    const heroRect = hero.getBoundingClientRect();
+    if (wsRect.top <= y && wsRect.bottom >= y) {
+      header.setAttribute("data-surface", ws.getAttribute("data-surface"));
+    } else if (heroRect.top <= y && heroRect.bottom >= y) {
+      header.setAttribute("data-surface", "sodium");
+    } else {
+      header.setAttribute("data-surface", "ink");
+    }
+  };
+  window.addEventListener("scroll", syncHeaderSurface, { passive: true });
+  window.syncHeaderSurface = syncHeaderSurface;
+}
+
+// Hero Bitmap Particle Canvas
+function initHeroCanvas() {
+  const canvas = document.getElementById("hero-canvas");
+  const captionEl = document.getElementById("hero-cycle-caption");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const CYCLE = [
+    { desktop: "MKW REPORT", mobile: ["MKW", "REPORT"], caption: "Click title to reset · Click pixel banner to morph" },
+    { desktop: "SWEEP LOG", mobile: ["SWEEP", "LOG"], caption: "Matthews · Keyes · Wallingford" },
+    { desktop: "COVERAGE", mobile: ["COVER", "AGE"], caption: "Floor-by-floor coverage workflow" }
+  ];
+
+  let cssW = 0, cssH = 0, dpr = 1;
+  let isMobile = window.innerWidth < 768;
+  let cycleIdx = 0;
+  let particles = [];
+  let morphStart = 0;
+  let morphDuration = 1000;
+  let isAssembling = true;
+  let pointerX = -9999, pointerY = -9999;
+  let running = false;
+
+  function getTargetLayout(idx) {
+    const item = CYCLE[idx];
+    const lines = isMobile ? item.mobile : [item.desktop];
+    const layout = layoutGlyphLines(lines, 2, true);
+    return {
+      totalCols: Math.max(isMobile ? 47 : 79, layout.cols),
+      totalRows: isMobile ? 20 : 9,
+      cells: layout.cells
+    };
+  }
+
+  function sizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    isMobile = window.innerWidth < 768;
+    cssW = rect.width;
+    cssH = rect.height;
+    if (cssW <= 0 || cssH <= 0) return;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function buildParticles(idx, assemble) {
+    const t = getTargetLayout(idx);
+    const rng = makeRng(hashStr("mkw-" + idx + "-" + Date.now()));
+    const next = [];
+    const targetCells = t.cells;
+    if (assemble || particles.length === 0) {
+      for (let i = 0; i < targetCells.length; i++) {
+        const tc = targetCells[i];
+        next.push({
+          sx: assemble ? rng() * t.totalCols : tc.x,
+          sy: assemble ? rng() * t.totalRows : tc.y,
+          tx: tc.x, ty: tc.y, x: tc.x, y: tc.y, vx: 0, vy: 0,
+          delay: assemble ? rng() * 320 : 0,
+          color: TOKENS.ink, sparkle: false
+        });
+      }
+      isAssembling = assemble;
+      morphDuration = 1000;
+    } else {
+      const count = Math.max(particles.length, targetCells.length);
+      for (let i = 0; i < count; i++) {
+        const src = particles[i % particles.length];
+        const dst = targetCells[i % targetCells.length];
+        const sparkle = rng() < 0.14;
+        next.push({
+          sx: src.x, sy: src.y, tx: dst.x, ty: dst.y, x: src.x, y: src.y, vx: 0, vy: 0,
+          delay: (dst.x / t.totalCols) * 240,
+          color: sparkle ? TRACK_COLORS[Math.floor(rng() * 4)] : TOKENS.ink,
+          sparkle
+        });
+      }
+      isAssembling = false;
+      morphDuration = 800;
+    }
+    particles = next;
+    morphStart = performance.now();
+    captionEl.textContent = CYCLE[idx].caption;
+  }
+
+  function drawStatic() {
+    sizeCanvas();
+    if (cssW <= 0) return;
+    const t = getTargetLayout(0);
+    const cellW = cssW / t.totalCols;
+    const cellH = Math.min(cssH / t.totalRows, cellW / 1.15);
+    ctx.fillStyle = TOKENS.sodium;
+    ctx.fillRect(0, 0, cssW, cssH);
+    ctx.fillStyle = TOKENS.ink;
+    for (let i = 0; i < t.cells.length; i++) {
+      const c = t.cells[i];
+      ctx.fillRect(c.x * cellW, c.y * cellH, Math.ceil(cellW), Math.ceil(cellH));
+    }
+  }
+
+  function step(now) {
+    if (!appState.motionOn) {
+      running = false;
+      motion.remove(step);
+      drawStatic();
+      return;
+    }
+    if (cssW <= 0) sizeCanvas();
+    const t = getTargetLayout(cycleIdx);
+    const cellW = cssW / t.totalCols;
+    const cellH = Math.min(cssH / t.totalRows, cellW / 1.15);
+    const ease = isAssembling ? easeAssemble : easeMorph;
+    const elapsed = now - morphStart;
+
+    ctx.fillStyle = TOKENS.sodium;
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      const localT = Math.min(1, Math.max(0, (elapsed - p.delay) / morphDuration));
+      const k = ease(localT);
+      let gx = p.sx + (p.tx - p.sx) * k;
+      let gy = p.sy + (p.ty - p.sy) * k;
+      if (localT >= 1 && pointerX > -500) {
+        const dx = (gx * cellW + cellW * 0.5) - pointerX;
+        const dy = (gy * cellH + cellH * 0.5) - pointerY;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 44 && dist > 0.1) {
+          const force = (1 - dist / 44) * 1.1;
+          p.vx += (dx / dist) * force;
+          p.vy += (dy / dist) * force;
+        }
+      }
+      p.vx *= 0.84; p.vy *= 0.84;
+      gx += p.vx; gy += p.vy;
+      p.x = gx; p.y = gy;
+      ctx.fillStyle = (p.sparkle && localT < 0.92) ? p.color : TOKENS.ink;
+      ctx.fillRect(Math.round(gx * cellW), Math.round(gy * cellH), Math.ceil(cellW), Math.ceil(cellH));
+    }
+  }
+
+  function start() {
+    if (!appState.motionOn) { drawStatic(); return; }
+    sizeCanvas();
+    buildParticles(cycleIdx, true);
+    if (!running) { running = true; motion.add(step); }
+  }
+
+  canvas.addEventListener("click", () => {
+    cycleIdx = (cycleIdx + 1) % CYCLE.length;
+    if (!appState.motionOn) { drawStatic(); captionEl.textContent = CYCLE[cycleIdx].caption; return; }
+    buildParticles(cycleIdx, false);
+  });
+  canvas.addEventListener("pointermove", e => {
+    const r = canvas.getBoundingClientRect();
+    pointerX = e.clientX - r.left;
+    pointerY = e.clientY - r.top;
+  });
+  canvas.addEventListener("pointerleave", () => { pointerX = -9999; pointerY = -9999; });
+  window.addEventListener("resize", () => { sizeCanvas(); if (!appState.motionOn) drawStatic(); }, { passive: true });
+  window.addEventListener("raster:motionchange", () => {
+    if (appState.motionOn) start();
+    else { running = false; motion.remove(step); drawStatic(); }
+  });
+  start();
+}
+
+// =========================================================================
+// MKW COVERAGE REPORT GENERATOR LOGIC
+// =========================================================================
+
+function getTodayISO() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getCurrentTimeHHMM() {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+}
+
+function formatReadableDate(iso) {
+  if (!iso) return "[Date]";
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+function formatReadableTime(hhmm) {
+  if (!hhmm) return "[Time]";
+  const parts = hhmm.split(":");
+  let h = parseInt(parts[0], 10);
+  const m = parts[1] || "00";
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m} ${ampm}`;
+}
+
+function formatStaffReportName(name) {
+  const clean = (name || "").trim();
+  if (!clean) return "";
+  if (clean.includes(",")) {
+    const [last, ...rest] = clean.split(",");
+    return `${last.trim().toUpperCase()}, ${rest.join(",").trim()}`;
+  }
+  const parts = clean.split(/\s+/);
+  if (parts.length === 1) return parts[0].toUpperCase();
+  const last = parts[parts.length - 1].toUpperCase();
+  const first = parts.slice(0, -1).join(" ");
+  return `${last}, ${first}`;
+}
+
+function getStaffLastName(name) {
+  const clean = (name || "").trim();
+  if (!clean) return "";
+  if (clean.includes(",")) return clean.split(",")[0].trim().toUpperCase();
+  const parts = clean.split(/\s+/);
+  return parts[parts.length - 1].toUpperCase();
+}
+
+function getAllActiveCAs() {
+  const seen = new Set();
+  const list = [];
+  if (appState.leadCA) {
+    seen.add(appState.leadCA);
+    list.push(appState.leadCA);
+  }
+  appState.supportCAs.forEach(ca => {
+    if (ca && !seen.has(ca)) {
+      seen.add(ca);
+      list.push(ca);
+    }
+  });
+  return list;
+}
+
+function renderCADropdowns() {
+  renderSingleCADropdown("leadCA", false);
+  renderSingleCADropdown("supportCAs", true);
+  renderSupportTags();
+}
+
+function closeAllCADropdowns() {
+  document.querySelectorAll(".ca-dropdown.is-open").forEach(el => {
+    el.classList.remove("is-open");
+    const t = el.querySelector(".dropdown-toggle");
+    if (t) t.setAttribute("aria-expanded", "false");
+  });
+  const backdrop = document.getElementById("caSheetBackdrop");
+  if (backdrop) backdrop.hidden = true;
+  document.documentElement.classList.remove("ca-sheet-open");
+}
+
+function renderSingleCADropdown(id, isMulti) {
+  const container = document.getElementById(id);
+  if (!container) return;
+  const toggleBtn = container.querySelector(".dropdown-toggle");
+  const menu = container.querySelector(".dropdown-menu");
+  const placeholder = container.dataset.placeholder || "Select";
+  const max = parseInt(container.dataset.max || "1", 10);
+  const prevScrollEl = menu.querySelector(".ca-options-scroll");
+  const prevScrollTop = prevScrollEl ? prevScrollEl.scrollTop : 0;
+
+  if (isMulti) {
+    toggleBtn.textContent = appState.supportCAs.length > 0
+      ? `${appState.supportCAs.length} of ${max} Support CA${appState.supportCAs.length === 1 ? "" : "s"} selected`
+      : placeholder;
+  } else {
+    toggleBtn.textContent = appState.leadCA ? formatStaffReportName(appState.leadCA) : placeholder;
+  }
+
+  const sheetTitle = isMulti
+    ? `Support CAs (${appState.supportCAs.length}/${max})`
+    : "Lead CA (Optional)";
+
+  const optionsHtml = appState.caRoster.map(name => {
+    const selected = isMulti ? appState.supportCAs.includes(name) : appState.leadCA === name;
+    return `
+      <button type="button" class="ca-option-btn" data-ca="${esc(name)}" aria-selected="${selected ? "true" : "false"}">
+        <span>${esc(formatStaffReportName(name))}</span>
+        <span class="ca-option-box">${selected ? "✓" : ""}</span>
+      </button>
+    `;
+  }).join("");
+
+  menu.innerHTML = `
+    <div class="ca-sheet-header">
+      <span class="t-small fw-600">${esc(sheetTitle)}</span>
+      <button type="button" class="ca-sheet-done" data-sheet-done="${id}">Done</button>
+    </div>
+    <div class="ca-add-row">
+      <input type="text" placeholder="Add CA (e.g. Isha Dua or DUA, Isha)..." aria-label="Add CA full name" data-add-input="${id}">
+      <button type="button" class="ca-add-btn" data-add-btn="${id}">Add</button>
+    </div>
+    <div class="ca-options-scroll">${optionsHtml}</div>
+  `;
+
+  const nextScrollEl = menu.querySelector(".ca-options-scroll");
+  if (nextScrollEl && prevScrollTop > 0) {
+    nextScrollEl.scrollTop = prevScrollTop;
+  }
+
+  const doneBtn = menu.querySelector(`[data-sheet-done="${id}"]`);
+  if (doneBtn) {
+    doneBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      closeAllCADropdowns();
+    });
+  }
+
+  menu.querySelectorAll(".ca-option-btn").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      const name = btn.dataset.ca;
+      if (isMulti) {
+        const idx = appState.supportCAs.indexOf(name);
+        if (idx >= 0) {
+          appState.supportCAs.splice(idx, 1);
+        } else if (appState.supportCAs.length < max) {
+          appState.supportCAs.push(name);
+        }
+      } else {
+        appState.leadCA = appState.leadCA === name ? "" : name;
+        closeAllCADropdowns();
+      }
+      renderCADropdowns();
+    });
+  });
+
+  const addInput = menu.querySelector(`[data-add-input="${id}"]`);
+  const addBtn = menu.querySelector(`[data-add-btn="${id}"]`);
+  const handleAdd = () => {
+    const val = (addInput.value || "").trim();
+    if (!val) return;
+    if (!appState.caRoster.includes(val)) {
+      appState.caRoster.push(val);
+      storageSet("mkw.caRoster.v2", appState.caRoster);
+    }
+    if (isMulti) {
+      if (!appState.supportCAs.includes(val) && appState.supportCAs.length < max) {
+        appState.supportCAs.push(val);
+      }
+    } else {
+      appState.leadCA = val;
+      closeAllCADropdowns();
+    }
+    renderCADropdowns();
+  };
+
+  addBtn.addEventListener("click", e => { e.stopPropagation(); handleAdd(); });
+  addInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); handleAdd(); }
+  });
+  addInput.addEventListener("click", e => e.stopPropagation());
+}
+
+function renderSupportTags() {
+  const tagsEl = document.getElementById("supportCAs-tags");
+  if (!tagsEl) return;
+  tagsEl.innerHTML = appState.supportCAs.map(name => `
+    <span class="selected-tag">
+      <span>${esc(formatStaffReportName(name))}</span>
+      <button type="button" aria-label="Remove ${esc(name)}" data-remove-ca="${esc(name)}">×</button>
+    </span>
+  `).join("");
+  tagsEl.querySelectorAll("[data-remove-ca]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.removeCa;
+      appState.supportCAs = appState.supportCAs.filter(n => n !== target);
+      renderCADropdowns();
+    });
+  });
+}
+
+function toggleCADropdown(btn) {
+  const parent = btn.closest(".ca-dropdown");
+  const isOpen = parent.classList.contains("is-open");
+  closeAllCADropdowns();
+  if (!isOpen) {
+    parent.classList.add("is-open");
+    btn.setAttribute("aria-expanded", "true");
+    if (window.innerWidth < 768) {
+      const backdrop = document.getElementById("caSheetBackdrop");
+      if (backdrop) backdrop.hidden = false;
+      document.documentElement.classList.add("ca-sheet-open");
+    }
+  }
+}
+
+document.addEventListener("click", e => {
+  if (!e.target.closest(".ca-dropdown")) {
+    closeAllCADropdowns();
+  }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    closeAllCADropdowns();
+  }
+});
+
+function syncMobileThumbBar() {
+  const bar = document.getElementById("mobileThumbBar");
+  const leftBtn = document.getElementById("mobileThumbLeftBtn");
+  const rightBtn = document.getElementById("mobileThumbRightBtn");
+  if (!bar || !leftBtn || !rightBtn) return;
+
+  const viewId = appState.currentView;
+  if (viewId === "view-main") {
+    bar.hidden = true;
+    document.body.classList.remove("has-thumb-bar");
+    return;
+  }
+
+  bar.hidden = false;
+  bar.setAttribute("data-surface", viewId === "view-preview" ? "ink" : "paper");
+  document.body.classList.add("has-thumb-bar");
+  leftBtn.disabled = false;
+
+  const rightSpan = rightBtn.querySelector("span") || rightBtn;
+
+  if (viewId === "view-buildings") {
+    leftBtn.textContent = "← Main";
+    rightSpan.textContent = "Start Sweep →";
+  } else if (viewId === "view-floor") {
+    const key = appState.sweepQueue[appState.sweepIndex];
+    const entry = key ? appState.floorData[key] : null;
+    const isFirst = appState.sweepIndex === 0;
+    const isLast = appState.sweepIndex >= appState.sweepQueue.length - 1;
+    const hasCustomNotes = entry && Boolean((entry.notes || "").trim());
+    const hasIssueStatus = entry && (
+      entry.status === "Noise Follow-Up" ||
+      entry.status === "Work Order Submitted" ||
+      entry.status === "IR / SOC Submitted"
+    );
+    leftBtn.textContent = isFirst ? "← Bldgs" : "← Prev";
+    if (hasCustomNotes || hasIssueStatus) {
+      rightSpan.textContent = isLast ? "Finish Sweep →" : "Next Floor →";
+    } else {
+      rightSpan.textContent = isLast ? "Quiet → Finish" : "Quiet → Next";
+    }
+  } else if (viewId === "view-summary") {
+    leftBtn.textContent = "← Sweep";
+    rightSpan.textContent = "Preview →";
+  } else if (viewId === "view-preview") {
+    leftBtn.textContent = "← Edit";
+    rightSpan.textContent = "Copy Full Report";
+  }
+}
+
+function quickAdvanceFloor() {
+  const key = appState.sweepQueue[appState.sweepIndex];
+  const entry = key ? appState.floorData[key] : null;
+  if (entry) {
+    const hasCustomNotes = Boolean((entry.notes || "").trim());
+    const hasIssueStatus = (
+      entry.status === "Noise Follow-Up" ||
+      entry.status === "Work Order Submitted" ||
+      entry.status === "IR / SOC Submitted"
+    );
+    if (!hasCustomNotes && !hasIssueStatus && !entry.status) {
+      entry.status = entry.defaultStatus || "Quiet";
+    }
+  }
+  finishSweep();
+}
+
+function showView(viewId, skipWipe) {
+  const performSwap = () => {
+    closeAllCADropdowns();
+    document.querySelectorAll(".app-view").forEach(v => {
+      const isTarget = v.id === viewId;
+      v.hidden = !isTarget;
+      v.classList.toggle("active", isTarget);
+    });
+    appState.currentView = viewId;
+
+    document.body.classList.toggle("mobile-hero-compact", viewId !== "view-main");
+
+    const ws = document.getElementById("workspace");
+    ws.setAttribute("data-surface", viewId === "view-preview" ? "ink" : "paper");
+
+    const order = ["view-main", "view-buildings", "view-floor", "view-summary", "view-preview"];
+    const curIdx = order.indexOf(viewId);
+    document.querySelectorAll("[data-nav-view]").forEach(btn => {
+      const bId = btn.dataset.navView;
+      const bIdx = order.indexOf(bId);
+      if (bId === viewId) {
+        btn.setAttribute("aria-current", "step");
+      } else {
+        btn.removeAttribute("aria-current");
+      }
+      if (bIdx < curIdx) btn.setAttribute("data-done", "true");
+      else btn.removeAttribute("data-done");
+    });
+
+    const stepStrip = document.getElementById("step-strip");
+    const activePill = stepStrip ? stepStrip.querySelector('[aria-current="step"]') : null;
+    if (stepStrip && activePill && window.innerWidth < 768) {
+      stepStrip.scrollLeft = Math.max(0, activePill.offsetLeft - (stepStrip.clientWidth - activePill.offsetWidth) / 2);
+    }
+
+    if (viewId === "view-buildings") renderBuildings();
+    if (viewId === "view-floor") renderCurrentFloor();
+    if (viewId === "view-summary") renderSummary();
+    syncMobileThumbBar();
+    if (window.syncHeaderSurface) window.syncHeaderSurface();
+
+    const wsEl = document.getElementById("workspace");
+    if (wsEl && !skipWipe) {
+      wsEl.scrollIntoView({ behavior: appState.motionOn ? "smooth" : "auto", block: "start" });
+    }
+  };
+
+  if (skipWipe) performSwap();
+  else playWipe(performSwap);
+}
+
+function goToBuildings() {
+  showView("view-buildings");
+}
+
+function moveBuildingOrder(id, delta) {
+  const idx = appState.selectedBuildings.indexOf(id);
+  const next = idx + delta;
+  if (idx < 0 || next < 0 || next >= appState.selectedBuildings.length) return;
+  const copy = appState.selectedBuildings.slice();
+  const [item] = copy.splice(idx, 1);
+  copy.splice(next, 0, item);
+  appState.selectedBuildings = copy;
+  appState.sweepQueue = [];
+  renderBuildings();
+}
+
+function renderBuildings() {
+  const wrap = document.getElementById("buildingChoices");
+  const readout = document.getElementById("buildingOrderReadout");
+
+  // Show selected buildings in active sweep order first, followed by any unselected buildings
+  const orderedBuildings = [
+    ...appState.selectedBuildings.map(id => BUILDINGS.find(b => b.id === id)).filter(Boolean),
+    ...BUILDINGS.filter(b => !appState.selectedBuildings.includes(b.id))
+  ];
+
+  if (readout) {
+    if (appState.selectedBuildings.length === 0) {
+      readout.textContent = "No buildings selected";
+    } else {
+      readout.textContent = appState.selectedBuildings
+        .map((id, i) => {
+          const b = BUILDINGS.find(item => item.id === id);
+          return b ? `${i + 1}. ${b.name}` : "";
+        })
+        .filter(Boolean)
+        .join(" → ");
+    }
+  }
+
+  wrap.innerHTML = orderedBuildings.map(b => {
+    const orderIdx = appState.selectedBuildings.indexOf(b.id);
+    const selected = orderIdx >= 0;
+    const isFirst = orderIdx === 0;
+    const isLast = orderIdx === appState.selectedBuildings.length - 1;
+    return `
+      <div class="building-card-btn" role="button" tabindex="0" data-bldg="${esc(b.id)}" aria-pressed="${selected ? "true" : "false"}" style="--bldg-color:${b.color};cursor:pointer;">
+        <div class="building-card-top">
+          ${svgBitmapText(b.code, 4, TOKENS.ink, { bold: true, ariaHidden: true })}
+          <span class="building-check-square t-small fw-600">${selected ? "✓" : ""}</span>
+        </div>
+        <div>
+          <div class="t-lead fw-600">${esc(b.name)}</div>
+          <div class="t-micro tnum" style="margin-top:6px;">${b.floors.length} floors · ${esc(b.floors[0])} → ${esc(b.floors[b.floors.length - 1])}</div>
+          ${selected ? `
+            <div class="building-order-actions">
+              <span class="order-step-badge">#${orderIdx + 1}</span>
+              <div class="order-move-group">
+                <button type="button" class="order-move-btn" data-move-bldg="${esc(b.id)}" data-move-dir="-1" aria-label="Move ${esc(b.name)} earlier" ${isFirst ? "disabled" : ""}>←</button>
+                <button type="button" class="order-move-btn" data-move-bldg="${esc(b.id)}" data-move-dir="1" aria-label="Move ${esc(b.name)} later" ${isLast ? "disabled" : ""}>→</button>
+              </div>
+            </div>
+          ` : `
+            <div class="building-order-actions">
+              <span class="t-micro" style="opacity:0.7;">Not included</span>
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  wrap.querySelectorAll("[data-move-bldg]").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      moveBuildingOrder(btn.dataset.moveBldg, parseInt(btn.dataset.moveDir, 10));
+    });
+  });
+
+  const toggleBldg = card => {
+    const id = card.dataset.bldg;
+    const idx = appState.selectedBuildings.indexOf(id);
+    if (idx >= 0) appState.selectedBuildings.splice(idx, 1);
+    else appState.selectedBuildings.push(id);
+    appState.sweepQueue = [];
+    document.getElementById("buildings-error").hidden = true;
+    renderBuildings();
+  };
+
+  wrap.querySelectorAll(".building-card-btn").forEach(card => {
+    card.addEventListener("click", e => {
+      if (e.target.closest("[data-move-bldg]")) return;
+      toggleBldg(card);
+    });
+    card.addEventListener("keydown", e => {
+      if (e.target !== card) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleBldg(card);
+      }
+    });
+  });
+}
+
+function buildSweepQueue() {
+  const queue = [];
+  const chosen = appState.selectedBuildings
+    .map(id => BUILDINGS.find(b => b.id === id))
+    .filter(Boolean);
+  const list = chosen.length > 0 ? chosen : [BUILDINGS[0]];
+  list.forEach(b => {
+    b.floors.forEach(fl => {
+      const key = `${b.id}::${fl}`;
+      const cfg = FLOOR_CONFIGS[key] || { defaultStatus: "Quiet", rooms: [] };
+      if (!appState.floorData[key]) {
+        const roomCounts = {};
+        (cfg.rooms || []).forEach(r => { roomCounts[r] = 0; });
+        appState.floorData[key] = {
+          buildingId: b.id,
+          buildingName: b.name,
+          buildingColor: b.color,
+          floorName: fl,
+          defaultStatus: cfg.defaultStatus || "Quiet",
+          status: cfg.defaultStatus || "Quiet",
+          rooms: cfg.rooms || [],
+          roomCounts,
+          storageRoomsNote: cfg.storageRoomsNote || "",
+          storageUnlocked: false,
+          storageNote: "",
+          notes: "",
+          visited: false
+        };
+      }
+      queue.push(key);
+    });
+  });
+  appState.sweepQueue = queue;
+  appState.sweepIndex = 0;
+}
+
+function startSweep() {
+  if (appState.selectedBuildings.length === 0) {
+    document.getElementById("buildings-error").hidden = false;
+    return;
+  }
+  document.getElementById("buildings-error").hidden = true;
+  buildSweepQueue();
+  showView("view-floor");
+}
+
+function insertQuickSnippet(textarea, text, replaceIfQuiet) {
+  const current = (textarea.value || "").trim();
+  let nextVal = "";
+  if (!current || (replaceIfQuiet && /^quiet(\.\s*roof access locked)?\.?$/i.test(current))) {
+    nextVal = text;
+  } else {
+    const needsSpace = !/\s$/.test(textarea.value);
+    nextVal = textarea.value + (needsSpace ? " " : "") + text;
+  }
+  textarea.value = nextVal;
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  textarea.focus();
+  const parenEmpty = nextVal.indexOf(": )");
+  if (parenEmpty >= 0) {
+    textarea.setSelectionRange(parenEmpty + 2, parenEmpty + 2);
+  }
+}
+
+function formatRoomLocationPhrase(roomName) {
+  if (/\bB\d+/i.test(roomName)) {
+    return `in ${roomName}`;
+  }
+  return `in the ${roomName.toLowerCase()}`;
+}
+
+function joinNaturalList(parts) {
+  if (parts.length === 1) return parts[0];
+  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
+  return `${parts.slice(0, -1).join(", ")}, and ${parts[parts.length - 1]}`;
+}
+
+function formatFloorOutputLine(entry) {
+  let out = (entry.notes || "").trim() || entry.status || entry.defaultStatus || "Quiet";
+  const roomParts = [];
+  (entry.rooms || []).forEach(r => {
+    const cnt = Number((entry.roomCounts && entry.roomCounts[r]) || 0);
+    if (cnt > 0) {
+      roomParts.push(`${cnt} ${cnt === 1 ? "student" : "students"} ${formatRoomLocationPhrase(r)}`);
+    }
+  });
+
+  if (roomParts.length > 0) {
+    const joined = joinNaturalList(roomParts);
+    if (/^quiet$/i.test(out)) {
+      out = `Quiet, met ${joined}.`;
+    } else if (/^quiet,/i.test(out)) {
+      out = `${out.replace(/\.$/, "")}, met ${joined}.`;
+    } else if (/[.!?]$/.test(out)) {
+      out = `${out} Met ${joined}.`;
+    } else {
+      out = `${out} — met ${joined}.`;
+    }
+  }
+
+  if (entry.storageUnlocked) {
+    const detail = (entry.storageNote || "").trim();
+    const storageSentence = detail
+      ? `Storage rooms found unlocked (${detail}).`
+      : `Storage rooms found unlocked.`;
+    if (/[.!?]$/.test(out)) {
+      out = `${out} ${storageSentence}`;
+    } else {
+      out = `${out}. ${storageSentence}`;
+    }
+  }
+
+  return out;
+}
+
+function renderCurrentFloor() {
+  if (appState.sweepQueue.length === 0) buildSweepQueue();
+  const key = appState.sweepQueue[appState.sweepIndex];
+  const entry = appState.floorData[key];
+  entry.visited = true;
+
+  const contentEl = document.getElementById("floorViewContent");
+  const posEl = document.getElementById("globalFloorPosition");
+  const nextBtn = document.getElementById("floorNextBtn");
+
+  const bldgIndices = appState.sweepQueue.filter(k => appState.floorData[k].buildingId === entry.buildingId);
+  const floorInBldg = bldgIndices.indexOf(key) + 1;
+  const isLastGlobal = appState.sweepIndex === appState.sweepQueue.length - 1;
+
+  const statuses = [];
+  if (entry.defaultStatus && entry.defaultStatus !== "Quiet") {
+    statuses.push({ label: entry.defaultStatus, type: "clear" });
+  }
+  statuses.push(
+    { label: "Quiet", type: "clear" },
+    { label: "Quiet, all doors locked.", type: "clear" },
+    { label: "Noise Follow-Up", type: "issue" },
+    { label: "Work Order Submitted", type: "issue" },
+    { label: "IR / SOC Submitted", type: "issue" }
+  );
+
+  const quickSnippets = [
+    { label: "Quiet", text: "Quiet", replace: true },
+    { label: "All doors locked", text: "Quiet, all doors locked.", replace: true },
+    { label: "Common room active", text: "Met students in the common room.", replace: true },
+    { label: "Study room active", text: "Met students in the study room.", replace: true },
+    { label: "Work Order (+ID)", text: "A work order has been submitted (RoomSpaceID: ).", replace: true },
+    { label: "Noise warning", text: "Students were compliant and a noise warning was given.", replace: true },
+    { label: "Noise IR (+ID)", text: "Noise IR submitted (IncidentID: ).", replace: true },
+    { label: "SOC (+ID)", text: "An SOC has been submitted (ConcernID: ).", replace: true },
+    { label: "RLAC-OC notified", text: "RLAC-OC was notified.", replace: false },
+    { label: "Campus Safety / SD", text: "Called Service Desk and Campus Safety secured the door.", replace: false }
+  ];
+
+  const activeCALastNames = Array.from(new Set(getAllActiveCAs().map(getStaffLastName).filter(Boolean)));
+  const hasRooms = Array.isArray(entry.rooms) && entry.rooms.length > 0;
+
+  const bannerDot = document.getElementById("sweepBannerDot");
+  const bannerTitle = document.getElementById("sweepBannerTitle");
+  const bannerHint = document.getElementById("sweepBannerHint");
+  const progressFill = document.getElementById("sweepProgressFill");
+  if (bannerDot) bannerDot.style.backgroundColor = entry.buildingColor;
+  if (bannerTitle) bannerTitle.textContent = `${entry.buildingName} · ${entry.floorName}`;
+  if (bannerHint) bannerHint.textContent = `${appState.sweepIndex + 1} / ${appState.sweepQueue.length} · Top → Bottom`;
+  if (progressFill) {
+    const pct = Math.round(((appState.sweepIndex + 1) / Math.max(1, appState.sweepQueue.length)) * 100);
+    progressFill.style.width = `${pct}%`;
+  }
+
+  contentEl.innerHTML = `
+    <div class="floor-card">
+      <div class="floor-card-header">
+        <div>
+          <span class="floor-band-tag t-micro" style="background-color:${entry.buildingColor};">${esc(entry.buildingName)}</span>
+          <h2 class="t-h2">${esc(entry.floorName)}</h2>
+        </div>
+        <span class="t-micro tnum">${esc(entry.buildingName)} · ${floorInBldg} of ${bldgIndices.length}</span>
+      </div>
+
+      ${hasRooms ? `
+        <div class="room-checks-section" style="margin-top:16px;padding-top:0;border-top:0;">
+          <p class="t-small fw-600">Room Checks (Student Count)</p>
+          <div class="room-counter-list">
+            ${entry.rooms.map((roomName, rIdx) => {
+              const cnt = Number((entry.roomCounts && entry.roomCounts[roomName]) || 0);
+              return `
+                <div class="room-counter-row${cnt > 0 ? " has-count" : ""}" data-room-row="${rIdx}">
+                  <span class="room-counter-label">${esc(roomName)}</span>
+                  <div class="room-stepper">
+                    <button type="button" class="room-stepper-btn" data-room-dec="${rIdx}" aria-label="Decrease ${esc(roomName)}">−</button>
+                    <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" class="room-stepper-input" data-room-val="${rIdx}" value="${cnt}" aria-label="${esc(roomName)} count">
+                    <button type="button" class="room-stepper-btn" data-room-inc="${rIdx}" aria-label="Increase ${esc(roomName)}">+</button>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      ` : ""}
+
+      ${entry.storageRoomsNote ? `
+        <div class="storage-check-box">
+          <label class="storage-check-row">
+            <input type="checkbox" id="storageUnlockedCheck" ${entry.storageUnlocked ? "checked" : ""}>
+            <span class="t-small fw-600">Storage rooms found unlocked</span>
+          </label>
+          <div class="helper-text">${esc(entry.storageRoomsNote)}</div>
+          ${entry.storageUnlocked ? `
+            <input type="text" id="storageRoomDetailInput" class="text-input" style="height:40px;font-size:1rem;" value="${esc(entry.storageNote || "")}" placeholder="Which storage room(s)? (e.g., B113, B140)">
+          ` : ""}
+        </div>
+      ` : ""}
+
+      <div style="margin-top:20px;">
+        <p class="t-small fw-600">Floor Status</p>
+        <div class="floor-status-group">
+          ${statuses.map(s => `
+            <button type="button" class="chip-toggle" data-status="${s.type}" data-val="${esc(s.label)}" aria-pressed="${entry.status === s.label ? "true" : "false"}">${esc(s.label)}</button>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-top:20px;">
+        <label for="floorNotesInput">${esc(entry.floorName)} Notes</label>
+        <div class="snippet-bar">
+          <div class="snippet-bar-head">
+            <span class="t-micro">QUICK SNIPPETS (NO TIMESTAMPS)</span>
+            <span class="t-micro snippet-swipe-hint">Swipe →</span>
+          </div>
+          <div class="snippet-row">
+            ${quickSnippets.map((sn, idx) => `
+              <button type="button" class="snippet-chip" data-snippet-idx="${idx}">${esc(sn.label)}</button>
+            `).join("")}
+            ${activeCALastNames.map(ln => `
+              <button type="button" class="snippet-chip snippet-chip--ca" data-ca-last="${esc(ln)}">+ ${esc(ln)}</button>
+            `).join("")}
+          </div>
+        </div>
+        <textarea id="floorNotesInput" class="floor-notes-input" placeholder="Optional notes if not quiet standards (leave blank for ${esc(entry.status)})">${esc(entry.notes)}</textarea>
+      </div>
+
+      <div class="floor-nav-bar">
+        <button type="button" class="secondary-button" id="prevFloorBtn" ${appState.sweepIndex === 0 ? "disabled style='opacity:0.45;cursor:not-allowed;'" : ""}>← Previous Floor</button>
+        <span class="t-micro tnum">Step ${appState.sweepIndex + 1} of ${appState.sweepQueue.length}</span>
+        <button type="button" class="secondary-button" id="nextFloorBtn">${isLastGlobal ? "Complete Sweep →" : "Next Floor →"}</button>
+      </div>
+    </div>
+  `;
+
+  nextBtn.querySelector("span").textContent = isLastGlobal ? "Finish Sweep" : "Next Floor";
+
+  posEl.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;">
+      <span class="t-micro">GLOBAL SWEEP PROGRESS</span>
+      <span class="t-micro tnum">Step ${appState.sweepIndex + 1} of ${appState.sweepQueue.length}</span>
+    </div>
+    <div class="floor-pixel-strip">
+      ${appState.sweepQueue.map((qKey, i) => {
+        const qEntry = appState.floorData[qKey];
+        const shortB = qEntry.buildingId === "keyes" ? "K" : qEntry.buildingName.charAt(0);
+        const shortF = qEntry.floorName === "Basement" ? "B" : qEntry.floorName.replace("Floor ", "F");
+        const isCur = i === appState.sweepIndex;
+        const isVis = Boolean(qEntry.visited);
+        return `<button type="button" class="floor-pixel-cell tnum${isCur ? " is-current" : ""}${isVis ? " is-visited" : ""}" data-jump="${i}" title="${esc(qEntry.buildingName)} ${esc(qEntry.floorName)}">${shortB}:${shortF}</button>`;
+      }).join("")}
+    </div>
+  `;
+
+  const stripEl = posEl.querySelector(".floor-pixel-strip");
+  const curCellEl = stripEl ? stripEl.querySelector(".floor-pixel-cell.is-current") : null;
+  if (stripEl && curCellEl) {
+    stripEl.scrollLeft = Math.max(0, curCellEl.offsetLeft - (stripEl.clientWidth - curCellEl.offsetWidth) / 2);
+  }
+
+  const syncRoomRow = (rIdx, nextVal) => {
+    const rName = entry.rooms[rIdx];
+    const clean = Math.max(0, parseInt(nextVal, 10) || 0);
+    entry.roomCounts[rName] = clean;
+    const row = contentEl.querySelector(`[data-room-row="${rIdx}"]`);
+    const inp = contentEl.querySelector(`[data-room-val="${rIdx}"]`);
+    if (inp) inp.value = String(clean);
+    if (row) row.classList.toggle("has-count", clean > 0);
+  };
+
+  contentEl.querySelectorAll("[data-room-dec]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const rIdx = parseInt(btn.dataset.roomDec, 10);
+      const cur = Number(entry.roomCounts[entry.rooms[rIdx]] || 0);
+      syncRoomRow(rIdx, Math.max(0, cur - 1));
+    });
+  });
+
+  contentEl.querySelectorAll("[data-room-inc]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const rIdx = parseInt(btn.dataset.roomInc, 10);
+      const cur = Number(entry.roomCounts[entry.rooms[rIdx]] || 0);
+      syncRoomRow(rIdx, cur + 1);
+    });
+  });
+
+  contentEl.querySelectorAll("[data-room-val]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const rIdx = parseInt(inp.dataset.roomVal, 10);
+      syncRoomRow(rIdx, inp.value);
+    });
+  });
+
+  const storageCheck = document.getElementById("storageUnlockedCheck");
+  if (storageCheck) {
+    storageCheck.addEventListener("change", () => {
+      entry.storageUnlocked = storageCheck.checked;
+      renderCurrentFloor();
+    });
+  }
+  const storageDetail = document.getElementById("storageRoomDetailInput");
+  if (storageDetail) {
+    storageDetail.addEventListener("input", () => {
+      entry.storageNote = storageDetail.value;
+    });
+  }
+
+  contentEl.querySelectorAll("[data-val]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      entry.status = btn.dataset.val;
+      contentEl.querySelectorAll("[data-val]").forEach(b => {
+        b.setAttribute("aria-pressed", b.dataset.val === entry.status ? "true" : "false");
+      });
+      syncMobileThumbBar();
+    });
+  });
+
+  const notesInput = document.getElementById("floorNotesInput");
+  notesInput.addEventListener("input", e => {
+    entry.notes = e.target.value;
+    syncMobileThumbBar();
+  });
+
+  contentEl.querySelectorAll("[data-snippet-idx]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const sn = quickSnippets[parseInt(btn.dataset.snippetIdx, 10)];
+      if (sn) insertQuickSnippet(notesInput, sn.text, sn.replace);
+    });
+  });
+
+  contentEl.querySelectorAll("[data-ca-last]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      insertQuickSnippet(notesInput, btn.dataset.caLast + " ", false);
+    });
+  });
+
+  document.getElementById("prevFloorBtn").addEventListener("click", () => {
+    if (appState.sweepIndex > 0) {
+      appState.sweepIndex--;
+      renderCurrentFloor();
+    }
+  });
+
+  document.getElementById("nextFloorBtn").addEventListener("click", finishSweep);
+
+  posEl.querySelectorAll("[data-jump]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      appState.sweepIndex = parseInt(btn.dataset.jump, 10);
+      renderCurrentFloor();
+    });
+  });
+
+  syncMobileThumbBar();
+}
+
+function finishSweep() {
+  if (appState.sweepIndex < appState.sweepQueue.length - 1) {
+    appState.sweepIndex++;
+    renderCurrentFloor();
+    if (window.innerWidth < 768) {
+      const wsEl = document.getElementById("workspace");
+      if (wsEl) wsEl.scrollIntoView({ behavior: "auto", block: "start" });
+    }
+  } else {
+    appState.sweepEndTime = getCurrentTimeHHMM();
+    showView("view-summary");
+  }
+}
+
+function renderCallLogs() {
+  const container = document.getElementById("callLogsContainer");
+  const countLabel = document.getElementById("callsCountLabel");
+  if (!container) return;
+  if (countLabel) countLabel.textContent = String(appState.callsLog.length);
+
+  if (appState.callsLog.length === 0) {
+    container.innerHTML = `<p class="helper-text">No calls added — report will automatically state "0 calls were received".</p>`;
+    return;
+  }
+
+  container.innerHTML = appState.callsLog.map((c, idx) => `
+    <div class="call-log-row">
+      <input type="text" class="text-input" style="height:44px;font-size:1rem;" data-call-time="${idx}" value="${esc(c.time)}" placeholder="e.g. 11:30pm">
+      <input type="text" class="text-input" style="height:44px;font-size:1rem;" data-call-desc="${idx}" value="${esc(c.desc)}" placeholder="received a call about... (use LAST, First for students & LAST for CA)">
+      <button type="button" class="secondary-button" style="height:44px;min-height:44px;padding:0 14px;font-size:0.875rem;" data-remove-call="${idx}">Remove</button>
+    </div>
+  `).join("");
+
+  container.querySelectorAll("[data-call-time]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      appState.callsLog[parseInt(inp.dataset.callTime, 10)].time = inp.value;
+    });
+  });
+
+  container.querySelectorAll("[data-call-desc]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      appState.callsLog[parseInt(inp.dataset.callDesc, 10)].desc = inp.value;
+    });
+  });
+
+  container.querySelectorAll("[data-remove-call]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      appState.callsLog.splice(parseInt(btn.dataset.removeCall, 10), 1);
+      renderCallLogs();
+    });
+  });
+}
+
+function renderSummary() {
+  const wrap = document.getElementById("sweepSummaryFields");
+  const grouped = new Map();
+  appState.sweepQueue.forEach(key => {
+    const item = appState.floorData[key];
+    if (!grouped.has(item.buildingId)) grouped.set(item.buildingId, []);
+    grouped.get(item.buildingId).push({ key, item });
+  });
+
+  const activeCount = getAllActiveCAs().length;
+  const splitHint = activeCount > 2 ? "Optional — fill only if >2 CAs split this building" : "Leave blank unless >2 CAs split sweeps";
+
+  let html = "";
+  grouped.forEach((rows, bId) => {
+    const first = rows[0].item;
+    const splitVal = appState.buildingSweepCAs[bId] || "";
+    html += `
+      <div class="summary-building-block">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="floor-band-tag t-micro" style="background-color:${first.buildingColor};margin:0;">${esc(first.buildingName)}</span>
+            <span class="t-micro tnum">${rows.length} floors · Top to bottom</span>
+          </div>
+          <div style="flex:1 1 260px;max-width:360px;">
+            <input type="text" class="text-input" style="height:36px;font-size:0.8125rem;" data-split-cas="${esc(bId)}" value="${esc(splitVal)}" placeholder="CAs on Sweep (${splitHint})">
+          </div>
+        </div>
+        ${rows.map(({ key, item }) => {
+          const roomBadges = (item.rooms || [])
+            .filter(r => Number((item.roomCounts && item.roomCounts[r]) || 0) > 0)
+            .map(r => `<span class="summary-room-tag">${esc(r)}: ${Number(item.roomCounts[r])}</span>`)
+            .join("");
+          const storageBadge = item.storageUnlocked
+            ? `<span class="summary-room-tag" style="background-color:var(--coral);color:var(--paper);">Storage unlocked${item.storageNote ? ": " + esc(item.storageNote) : ""}</span>`
+            : "";
+          const statusOpts = item.defaultStatus && item.defaultStatus !== "Quiet"
+            ? [item.defaultStatus, "Quiet", "Quiet, all doors locked.", "Noise Follow-Up", "Work Order Submitted", "IR / SOC Submitted"]
+            : ["Quiet", "Quiet, all doors locked.", "Noise Follow-Up", "Work Order Submitted", "IR / SOC Submitted"];
+          return `
+          <div class="summary-floor-row">
+            <div>
+              <span class="t-small fw-600">${esc(item.floorName)}</span>
+              ${roomBadges || storageBadge ? `<div class="summary-room-tags">${roomBadges}${storageBadge}</div>` : ""}
+            </div>
+            <div>
+              <select class="select-input" style="height:40px;font-size:0.875rem;" data-sum-status="${esc(key)}">
+                ${statusOpts.map(st =>
+                  `<option value="${esc(st)}"${item.status === st ? " selected" : ""}>${esc(st)}</option>`
+                ).join("")}
+              </select>
+            </div>
+            <div>
+              <input type="text" class="text-input" style="height:40px;font-size:0.875rem;" data-sum-notes="${esc(key)}" value="${esc(item.notes)}" placeholder="Optional notes if not quiet standards">
+            </div>
+          </div>
+        `;
+        }).join("")}
+      </div>
+    `;
+  });
+
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll("[data-split-cas]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      appState.buildingSweepCAs[inp.dataset.splitCas] = inp.value;
+    });
+  });
+
+  wrap.querySelectorAll("[data-sum-status]").forEach(sel => {
+    sel.addEventListener("change", () => {
+      const k = sel.dataset.sumStatus;
+      if (appState.floorData[k]) appState.floorData[k].status = sel.value;
+    });
+  });
+
+  wrap.querySelectorAll("[data-sum-notes]").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const k = inp.dataset.sumNotes;
+      if (appState.floorData[k]) appState.floorData[k].notes = inp.value;
+    });
+  });
+
+  renderCallLogs();
+}
+
+function generateReport() {
+  if (appState.sweepQueue.length === 0) buildSweepQueue();
+  const dateVal = document.getElementById("reportDate").value;
+  const startVal = document.getElementById("startTime").value;
+  const endVal = appState.sweepEndTime || getCurrentTimeHHMM();
+  const onTime = document.getElementById("onTimeCheck").checked;
+  const generalNotes = (document.getElementById("generalNotes").value || "").trim();
+
+  const readableDate = formatReadableDate(dateVal);
+  const startReadable = formatReadableTime(startVal);
+  const endReadable = formatReadableTime(endVal);
+  const leadFormatted = appState.leadCA ? formatStaffReportName(appState.leadCA) : "N/A";
+  const supportFormatted = appState.supportCAs.length > 0
+    ? appState.supportCAs.map(formatStaffReportName).join("; ")
+    : "None";
+
+  const supportLastNames = appState.supportCAs.map(getStaffLastName).filter(Boolean);
+  const allLastNames = getAllActiveCAs().map(getStaffLastName).filter(Boolean);
+  const defaultCAsLine = (supportLastNames.length > 0 ? supportLastNames : allLastNames).join(", ");
+
+  const mainLines = [
+    `Date: ${readableDate}`,
+    `Start Time: ${startReadable}`,
+    `End Time: ${endReadable}`,
+    ``,
+    `Report Description:`,
+    `${readableDate} - MKW Coverage Report`,
+    `Lead CA: ${leadFormatted}`,
+    `Support CAs: ${supportFormatted}`
+  ];
+
+  const grouped = new Map();
+  appState.sweepQueue.forEach(key => {
+    const item = appState.floorData[key];
+    if (!grouped.has(item.buildingId)) grouped.set(item.buildingId, []);
+    grouped.get(item.buildingId).push(item);
+  });
+
+  const hasPerBuildingSplit = Array.from(grouped.keys()).some(bId => Boolean((appState.buildingSweepCAs[bId] || "").trim()));
+  const sweepLines = [];
+  if (!hasPerBuildingSplit && defaultCAsLine) {
+    sweepLines.push(defaultCAsLine);
+  }
+
+  grouped.forEach((items, bId) => {
+    const bName = items[0].buildingName;
+    const splitCAs = (appState.buildingSweepCAs[bId] || "").trim();
+    if (hasPerBuildingSplit && splitCAs) {
+      sweepLines.push(splitCAs);
+    }
+    sweepLines.push(`Building: ${bName}`);
+    items.forEach(item => {
+      sweepLines.push(`${item.floorName}: ${formatFloorOutputLine(item)}`);
+    });
+    sweepLines.push(``);
+  });
+
+  const trendExtra = (document.getElementById("shiftTrendNotes").value || "").trim();
+  const baseTone = appState.shiftTone === "busy" ? "The shift was busy" : "The shift was quiet";
+  const toneBullet = trendExtra
+    ? (trendExtra.endsWith(".") ? `${baseTone} — ${trendExtra}` : `${baseTone} — ${trendExtra}.`)
+    : `${baseTone}.`;
+
+  const irCount = Math.max(0, parseInt(document.getElementById("irCount").value || "0", 10) || 0);
+  const irDetails = (document.getElementById("irDetails").value || "").trim();
+  const irBullet = irDetails
+    ? `${irCount} IR${irCount === 1 ? "" : "s"} submitted (${irDetails})`
+    : (irCount === 0
+      ? `0 IRs submitted and 0 noise warnings given`
+      : `${irCount} IR${irCount === 1 ? "" : "s"} submitted`);
+
+  const socCount = Math.max(0, parseInt(document.getElementById("socCount").value || "0", 10) || 0);
+  const socDetails = (document.getElementById("socDetails").value || "").trim();
+  const socBullet = socDetails
+    ? `${socCount} SOC${socCount === 1 ? "" : "s"} submitted (${socDetails})`
+    : `${socCount} SOC${socCount === 1 ? "" : "s"} submitted`;
+
+  const woCount = Math.max(0, parseInt(document.getElementById("woCount").value || "0", 10) || 0);
+  const woRoomIds = (document.getElementById("woRoomIds").value || "").trim();
+
+  const summaryLines = [
+    `Coverage Summary:`,
+    `- ${toneBullet}`,
+    `- ${irBullet}`,
+    `- ${socBullet}`,
+    `- ${appState.callsLog.length} call${appState.callsLog.length === 1 ? " was" : "s were"} received`
+  ];
+
+  appState.callsLog.forEach(c => {
+    const t = (c.time || "").trim();
+    const d = (c.desc || "").trim();
+    if (t || d) {
+      summaryLines.push(`  ${t ? t + " - " : ""}${d}`);
+    }
+  });
+
+  summaryLines.push(`- ${woCount} work order${woCount === 1 ? " was" : "s were"} submitted`);
+  if (woRoomIds) {
+    summaryLines.push(`  ${woRoomIds.includes("RoomSpaceID") ? woRoomIds : "RoomSpaceID: " + woRoomIds}`);
+  }
+
+  summaryLines.push(`- ${onTime ? "All CAs were on time for coverage and sweeps." : "Note: Not all CAs were on time for coverage and sweeps."}`);
+  if (generalNotes) {
+    summaryLines.push(`- ${generalNotes}`);
+  }
+
+  const sweepBlock = sweepLines.join("\n").trimEnd();
+  const summaryBlock = summaryLines.join("\n");
+  const reportText = [mainLines.join("\n"), "", sweepBlock, "", summaryBlock].join("\n");
+
+  appState.lastSections = { sweep: sweepBlock, summary: summaryBlock };
+  document.getElementById("reportPreview").value = reportText;
+  document.getElementById("copyStatusBadge").hidden = true;
+
+  let durationStr = "—";
+  if (startVal && endVal) {
+    const [sh, sm] = startVal.split(":").map(Number);
+    const [eh, em] = endVal.split(":").map(Number);
+    let diff = (eh * 60 + em) - (sh * 60 + sm);
+    if (diff < 0) diff += 1440;
+    const hrs = Math.floor(diff / 60);
+    const mins = diff % 60;
+    durationStr = hrs > 0 ? `${hrs}h ${mins}m` : `${mins} min`;
+  }
+
+  const isoPrefix = dateVal || getTodayISO();
+  document.getElementById("timeReference").innerHTML = `
+    <span>Form Start Field: <strong>${esc(isoPrefix)} ${esc(startVal || "--:--")}</strong></span>
+    <span>Form End Field: <strong>${esc(isoPrefix)} ${esc(endVal || "--:--")}</strong></span>
+    <span>Elapsed: <strong>${esc(durationStr)}</strong></span>
+    <span>${reportText.length} chars</span>
+  `;
+
+  showView("view-preview");
+}
+
+const CONFETTI_COLORS = [
+  TOKENS.sodium,
+  TOKENS.blue,
+  TOKENS.pink,
+  TOKENS.green,
+  TOKENS.coral,
+  TOKENS.cream,
+  TOKENS.paper
+];
+let confettiParticles = [];
+let confettiRunning = false;
+let confettiLastTs = 0;
+
+function tickConfetti(now) {
+  const canvas = document.getElementById("confetti-canvas");
+  const ctx = canvas ? canvas.getContext("2d") : null;
+  if (!canvas || !ctx) {
+    confettiParticles = [];
+    confettiRunning = false;
+    motion.remove(tickConfetti);
+    if (canvas) canvas.classList.remove("is-active");
+    return;
+  }
+
+  const dt = Math.min(0.05, confettiLastTs ? (now - confettiLastTs) / 1000 : 0.016);
+  confettiLastTs = now;
+
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  const alive = [];
+  for (let i = 0; i < confettiParticles.length; i++) {
+    const p = confettiParticles[i];
+    p.age += dt;
+    if (p.age >= p.life || p.y > h + 40) continue;
+
+    p.vx *= Math.pow(0.985, dt * 60);
+    p.vy += p.gravity * dt;
+    p.x += p.vx * dt + Math.sin(p.age * p.swayFreq + p.phase) * p.swayAmp * dt;
+    p.y += p.vy * dt;
+    p.rot += p.vRot * dt;
+
+    const fadeStart = p.life * 0.72;
+    const alpha = p.age > fadeStart ? Math.max(0, 1 - (p.age - fadeStart) / (p.life - fadeStart)) : 1;
+    const flip = Math.cos(p.age * p.flipSpeed + p.phase);
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.scale(1, Math.abs(flip) < 0.18 ? 0.18 : flip);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w * 0.5, -p.h * 0.5, p.w, p.h);
+    ctx.restore();
+
+    alive.push(p);
+  }
+
+  confettiParticles = alive;
+  if (confettiParticles.length === 0) {
+    confettiRunning = false;
+    motion.remove(tickConfetti);
+    ctx.clearRect(0, 0, w, h);
+    canvas.classList.remove("is-active");
+  }
+}
+
+function launchPaletteConfetti() {
+  if (!appState.motionOn) return;
+  const canvas = document.getElementById("confetti-canvas");
+  if (!canvas) return;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  canvas.classList.add("is-active");
+
+  const isMobile = w < 768;
+  const count = isMobile ? 75 : 105;
+  const origins = isMobile ? [w * 0.28, w * 0.72] : [w * 0.25, w * 0.5, w * 0.75];
+
+  for (let i = 0; i < count; i++) {
+    const ox = origins[i % origins.length] + (Math.random() - 0.5) * (isMobile ? 48 : 80);
+    const oy = h - (isMobile ? 74 : 48) + (Math.random() - 0.5) * 20;
+    const centerPull = (w * 0.5 - ox) * (0.15 + Math.random() * 0.35);
+    const spreadVx = (Math.random() - 0.5) * (isMobile ? 380 : 540) + centerPull;
+    const shootVy = -(520 + Math.random() * (isMobile ? 420 : 520));
+    const size = 7 + Math.floor(Math.random() * 7);
+    const wide = Math.random() < 0.65;
+
+    confettiParticles.push({
+      x: ox,
+      y: oy,
+      vx: spreadVx,
+      vy: shootVy,
+      gravity: 980 + Math.random() * 260,
+      w: wide ? size * 1.6 : size,
+      h: wide ? size * 0.85 : size,
+      rot: Math.random() * Math.PI * 2,
+      vRot: (Math.random() - 0.5) * 10,
+      flipSpeed: 6 + Math.random() * 7,
+      swayFreq: 3 + Math.random() * 4,
+      swayAmp: 24 + Math.random() * 36,
+      phase: Math.random() * Math.PI * 2,
+      age: 0,
+      life: 1.85 + Math.random() * 0.85,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length]
+    });
+  }
+
+  if (!confettiRunning) {
+    confettiRunning = true;
+    confettiLastTs = performance.now();
+    motion.add(tickConfetti);
+  }
+}
+
+let mobileThumbFeedbackTimer = 0;
+
+async function copyTextWithBadge(text, label) {
+  const badge = document.getElementById("copyStatusBadge");
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (e) {
+    const tmp = document.createElement("textarea");
+    tmp.value = text;
+    tmp.setAttribute("readonly", "");
+    tmp.style.position = "fixed";
+    tmp.style.opacity = "0";
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand("copy");
+    document.body.removeChild(tmp);
+  }
+  badge.textContent = label || "Copied to clipboard · Good job!";
+  badge.hidden = false;
+
+  if (appState.currentView === "view-preview") {
+    const thumbRight = document.getElementById("mobileThumbRightBtn");
+    const span = thumbRight ? (thumbRight.querySelector("span") || thumbRight) : null;
+    if (span) {
+      span.textContent = "Copied! ✓";
+      window.clearTimeout(mobileThumbFeedbackTimer);
+      mobileThumbFeedbackTimer = window.setTimeout(() => {
+        if (appState.currentView === "view-preview") syncMobileThumbBar();
+      }, 2200);
+    }
+  }
+
+  launchPaletteConfetti();
+}
+
+async function copyReport() {
+  const textarea = document.getElementById("reportPreview");
+  await copyTextWithBadge(textarea.value, "Full report copied · Good job!");
+}
+
+async function copySection(which) {
+  const text = appState.lastSections[which] || "";
+  await copyTextWithBadge(text, which === "sweep" ? "Sweep notes copied · Good job!" : "Coverage summary copied · Good job!");
+}
+
+function startAgain() {
+  appState.leadCA = "";
+  appState.supportCAs = [];
+  appState.selectedBuildings = ["matthews", "keyes", "wallingford"];
+  appState.buildingSweepCAs = {};
+  appState.sweepQueue = [];
+  appState.sweepIndex = 0;
+  appState.floorData = {};
+  appState.sweepEndTime = "";
+  appState.shiftTone = "quiet";
+  appState.callsLog = [];
+  appState.lastSections = { sweep: "", summary: "" };
+
+  document.getElementById("reportDate").value = getTodayISO();
+  document.getElementById("startTime").value = getCurrentTimeHHMM();
+  document.getElementById("shiftQuietBtn").setAttribute("aria-pressed", "true");
+  document.getElementById("shiftBusyBtn").setAttribute("aria-pressed", "false");
+  document.getElementById("shiftTrendNotes").value = "";
+  document.getElementById("irCount").value = "0";
+  document.getElementById("irDetails").value = "";
+  document.getElementById("socCount").value = "0";
+  document.getElementById("socDetails").value = "";
+  document.getElementById("woCount").value = "0";
+  document.getElementById("woRoomIds").value = "";
+  document.getElementById("onTimeCheck").checked = true;
+  document.getElementById("generalNotes").value = "";
+  document.getElementById("reportPreview").value = "";
+  document.getElementById("buildings-error").hidden = true;
+  document.getElementById("copyStatusBadge").hidden = true;
+
+  renderCADropdowns();
+  renderBuildings();
+  renderCallLogs();
+  showView("view-main");
+}
+
+// Expose handlers globally for inline onclick attributes
+window.startAgain = startAgain;
+window.toggleCADropdown = toggleCADropdown;
+window.goToBuildings = goToBuildings;
+window.showView = showView;
+window.startSweep = startSweep;
+window.finishSweep = finishSweep;
+window.generateReport = generateReport;
+window.copyReport = copyReport;
+window.copySection = copySection;
+
+document.addEventListener("DOMContentLoaded", () => {
+  initChrome();
+  initTrail();
+  initHeroCanvas();
+
+  document.getElementById("reportDate").value = getTodayISO();
+  document.getElementById("startTime").value = getCurrentTimeHHMM();
+  document.getElementById("startTimeNowBtn").addEventListener("click", () => {
+    document.getElementById("startTime").value = getCurrentTimeHHMM();
+  });
+
+  const quietBtn = document.getElementById("shiftQuietBtn");
+  const busyBtn = document.getElementById("shiftBusyBtn");
+  quietBtn.addEventListener("click", () => {
+    appState.shiftTone = "quiet";
+    quietBtn.setAttribute("aria-pressed", "true");
+    busyBtn.setAttribute("aria-pressed", "false");
+  });
+  busyBtn.addEventListener("click", () => {
+    appState.shiftTone = "busy";
+    quietBtn.setAttribute("aria-pressed", "false");
+    busyBtn.setAttribute("aria-pressed", "true");
+  });
+
+  document.getElementById("addCallBtn").addEventListener("click", () => {
+    appState.callsLog.push({ time: "", desc: "" });
+    renderCallLogs();
+  });
+
+  const caBackdrop = document.getElementById("caSheetBackdrop");
+  if (caBackdrop) {
+    caBackdrop.addEventListener("click", closeAllCADropdowns);
+  }
+
+  const thumbLeft = document.getElementById("mobileThumbLeftBtn");
+  const thumbRight = document.getElementById("mobileThumbRightBtn");
+  if (thumbLeft) {
+    thumbLeft.addEventListener("click", () => {
+      if (appState.currentView === "view-buildings") showView("view-main");
+      else if (appState.currentView === "view-floor") {
+        if (appState.sweepIndex > 0) {
+          appState.sweepIndex--;
+          renderCurrentFloor();
+          const wsEl = document.getElementById("workspace");
+          if (wsEl) wsEl.scrollIntoView({ behavior: "auto", block: "start" });
+        } else {
+          showView("view-buildings");
+        }
+      }
+      else if (appState.currentView === "view-summary") showView("view-floor");
+      else if (appState.currentView === "view-preview") showView("view-summary");
+    });
+  }
+  if (thumbRight) {
+    thumbRight.addEventListener("click", () => {
+      if (appState.currentView === "view-buildings") startSweep();
+      else if (appState.currentView === "view-floor") quickAdvanceFloor();
+      else if (appState.currentView === "view-summary") generateReport();
+      else if (appState.currentView === "view-preview") copyReport();
+    });
+  }
+
+  renderCADropdowns();
+  renderBuildings();
+  renderCallLogs();
+  showView("view-main", true);
+});
+</script>
+</body>
+</html>
